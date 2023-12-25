@@ -1,15 +1,14 @@
 package com.notesapp.compressify
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,90 +21,47 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.notesapp.compressify.ui.components.image.CompressImageScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
+import com.notesapp.compressify.ui.viewmodel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-private lateinit var compressedImageUri : Uri
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val viewModel by viewModels<MainViewModel>()
+    private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            selectedPhotoLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.PickMultipleVisualMedia(),
+                onResult = { viewModel.onImageSelected(it) }
+            )
             CompressifyTheme {
-                // A surface container using the 'background' color from the theme
+                val selectedImages by viewModel.selectedImages.collectAsState()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppContent()
+                    CompressImageScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        selectedImages = selectedImages,
+                        onImageSelectClick = {
+                            selectedPhotoLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
+                    )
                 }
             }
         }
     }
-}
-
-@Composable
-fun AppContent() {
-
-    var selectedMediaUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val selectedMediaLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = {
-                uri -> selectedMediaUri = uri
-        }
-    )
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        SelectFileButton(onClick = {
-            selectedMediaLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
-            )
-        })
-    }
-
-    selectedMediaUri?.let { uri ->
-        val activity = LocalContext.current
-        try {
-            val bitmap = MediaStore.Images.Media.getBitmap(activity.contentResolver, uri)
-            val compressedHeight = bitmap.height / 2
-            val compressedWidth = bitmap.width / 2
-            val compressedBitmap = Bitmap.createScaledBitmap(bitmap, compressedWidth ,compressedHeight, false)
-            val path = MediaStore.Images.Media.insertImage(
-                activity.contentResolver,
-                compressedBitmap,
-                "Title",
-                null
-            )
-            println("path: $path")
-//            activity.
-//            openFileOutput("compressedImage", MODE_PRIVATE).use {it->
-//                compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-//            }
-//            compressedImageUri = Uri.parse(path.toString())
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error loading bitmap: ${e.message}")
-        }
-    }
 
 }
 
-@Composable
-fun SelectFileButton(onClick: () -> Unit) {
-    ElevatedButton(
-        onClick = onClick,
-        content = {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(0.7f)
-            ) {
-                Text(text = "Select a File to Compress", textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-            }
-        }
-    )
-}
+

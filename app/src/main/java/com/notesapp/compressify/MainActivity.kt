@@ -1,7 +1,5 @@
 package com.notesapp.compressify
 
-import android.app.Activity
-import android.content.Context.MODE_PRIVATE
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -106,7 +104,7 @@ fun SelectFileButton(onClick: () -> Unit) {
                     .padding(16.dp)
                     .fillMaxWidth(0.7f)
             ) {
-                Text(text = "Select a File to Compress", textAlign = TextAlign.Center)
+                Text(text = "Select a File to Compress", textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
             }
         }
     )

@@ -40,4 +40,10 @@ class MainViewModel @Inject constructor(
             ImageModel(uri = it)
         }
     }
+
+    fun onImageDelete(path: String) {
+        _selectedImages.value = _selectedImages.value.filter {
+            it.uri.path != path
+        }
+    }
 }

@@ -10,11 +10,12 @@ import com.notesapp.compressify.domain.model.ImageModel
 fun CompressImageScreen(
     selectedImages: List<ImageModel>,
     onImageSelectClick: () -> Unit,
+    onImageDelete: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if(selectedImages.isEmpty()) {
         SelectImagesScreen(onImageSelect = onImageSelectClick, modifier = Modifier.fillMaxSize())
     } else {
-        CompressOptionsScreen(selectedImages = selectedImages, modifier = Modifier.fillMaxSize())
+        CompressOptionsScreen(selectedImages = selectedImages, modifier = Modifier.fillMaxSize(), onDelete = onImageDelete)
     }
 }

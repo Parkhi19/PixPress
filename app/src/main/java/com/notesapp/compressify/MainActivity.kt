@@ -55,7 +55,8 @@ class MainActivity : ComponentActivity() {
                             selectedPhotoLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
-                        }
+                        },
+                        onImageDelete = { viewModel.onImageDelete(it) }
                     )
                 }
             }

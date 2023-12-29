@@ -64,10 +64,7 @@ class MainActivity : ComponentActivity() {
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
                         },
-                        onImageDelete = { viewModel.onImageDelete(it) },
-                        onConfirm = { resolution, quality, keepOriginal ->
-                            viewModel.onConfirm(resolution, quality, keepOriginal)
-                        }
+                        onUIEvent = viewModel::onUIEvent
                     )
                     if (showCompressionCompletedDialog) {
                         CompressionCompletedDialog(

@@ -7,6 +7,7 @@ import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
+import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -38,13 +39,9 @@ class MainViewModel @Inject constructor(
 
     }
 
-    fun onImageDelete(path: String) {
-        _selectedImages.value = _selectedImages.value.filter {
-            it.uri.path != path
-        }
-    }
 
-    fun onConfirm(resolution: Float, quality: Float, keepOriginal: Boolean) {
+
+    fun onImageCompressionOptionsConfirm(resolution: Float, quality: Float, keepOriginal: Boolean) {
         viewModelScope.launch {
             compressAndSaveImagesUseCase.launch(
                 CompressAndSaveImagesUseCase.Params(
@@ -58,6 +55,19 @@ class MainViewModel @Inject constructor(
                 )
             )
             sendEvent(Event.CompressionCompleted)
+        }
+    }
+
+    fun  onUIEvent(event: UIEvent) {
+        when(event) {
+            is UIEvent.Images.RemoveImageClicked -> {
+                _selectedImages.value = _selectedImages.value.filter {
+                    it.uri.path != event.path
+                }
+            }
+            is UIEvent.Images.CompressionOptionsConfirmed -> {
+                onImageCompressionOptionsConfirm(event.resolution, event.quality, event.keepOriginal)
+            }
         }
     }
 

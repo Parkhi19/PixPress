@@ -30,13 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.ui.theme.primaryGreen
+import com.notesapp.compressify.util.UIEvent
 
 @Composable
 fun CompressOptionsScreen(
     modifier: Modifier = Modifier,
     selectedImages: List<ImageModel>,
-    onDelete: (String) -> Unit,
-    onConfirm: (Float, Float, Boolean) -> Unit
+    onUIEvent : (UIEvent) -> Unit
 ) {
     var showDialog by remember {
         mutableStateOf(false)
@@ -48,7 +48,9 @@ fun CompressOptionsScreen(
                 ImagePreviewCard(
                     image = selectedImages[it],
                     modifier = Modifier.padding(8.dp),
-                    onDeleteClick = onDelete
+                    onDeleteClick = {
+                        onUIEvent(UIEvent.Images.RemoveImageClicked(it))
+                    }
                 )
             }
         }
@@ -65,7 +67,7 @@ fun CompressOptionsScreen(
             },
                 onConfirm = { resolution, quality, keepOriginal ->
                     showDialog = false
-                    onConfirm(resolution, quality, keepOriginal)
+                    onUIEvent(UIEvent.Images.CompressionOptionsConfirmed(resolution, quality, keepOriginal))
                 },
             )
         }

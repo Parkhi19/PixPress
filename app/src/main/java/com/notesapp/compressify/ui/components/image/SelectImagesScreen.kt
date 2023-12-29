@@ -40,5 +40,4 @@ fun SelectImagesScreen(onImageSelect: () -> Unit, modifier: Modifier = Modifier)
 
     }
 
-
 }

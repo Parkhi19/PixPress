@@ -11,11 +11,12 @@ fun CompressImageScreen(
     selectedImages: List<ImageModel>,
     onImageSelectClick: () -> Unit,
     onImageDelete: (String) -> Unit,
+    onConfirm : (Float, Float, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if(selectedImages.isEmpty()) {
         SelectImagesScreen(onImageSelect = onImageSelectClick, modifier = Modifier.fillMaxSize())
     } else {
-        CompressOptionsScreen(selectedImages = selectedImages, modifier = Modifier.fillMaxSize(), onDelete = onImageDelete)
+        CompressOptionsScreen(selectedImages = selectedImages, modifier = Modifier.fillMaxSize(), onDelete = onImageDelete, onConfirm = onConfirm)
     }
 }

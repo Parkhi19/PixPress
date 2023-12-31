@@ -1,6 +1,5 @@
 package com.notesapp.compressify.ui.components.image
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.notesapp.compressify.domain.model.ImageModel
-import com.notesapp.compressify.ui.theme.primaryGreen
+import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.util.UIEvent
 
 @Composable
@@ -121,9 +120,9 @@ fun OpenCompressDialog(
                             value = resolution,
                             valueRange = 0.1f..1f,
                             colors = SliderDefaults.colors(
-                                activeTrackColor = primaryGreen,
-                                thumbColor = primaryGreen,
-                                inactiveTrackColor = primaryGreen.copy(alpha = 0.7f)
+                                activeTrackColor = primaryColor,
+                                thumbColor = primaryColor,
+                                inactiveTrackColor = primaryColor.copy(alpha = 0.7f)
                             ),
                             onValueChange = {
                                 resolution = it
@@ -142,9 +141,9 @@ fun OpenCompressDialog(
                             value = quality,
                             valueRange = 0.1f..1f,
                             colors = SliderDefaults.colors(
-                                activeTrackColor = primaryGreen,
-                                thumbColor = primaryGreen,
-                                inactiveTrackColor = primaryGreen.copy(alpha = 0.7f)
+                                activeTrackColor = primaryColor,
+                                thumbColor = primaryColor,
+                                inactiveTrackColor = primaryColor.copy(alpha = 0.7f)
                             ),
                             onValueChange = {
                                 quality = it

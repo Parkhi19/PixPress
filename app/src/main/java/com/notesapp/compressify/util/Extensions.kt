@@ -1,11 +1,11 @@
 package com.notesapp.compressify.util
 
-import android.content.res.AssetFileDescriptor
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import com.notesapp.compressify.CompressApplication
+import kotlin.math.roundToInt
 
 
 fun Uri.createThumbnail(): Bitmap {
@@ -29,5 +29,15 @@ fun Uri.getFileSize():Long{
     val fileSize = fileDescriptor?.length?:0
     fileDescriptor?.close()
     return fileSize
+}
 
+fun Long.getFormattedSize(): String {
+    val kb = (this / 1024.0)
+    val mb = kb / 1024f
+
+    return if (mb > 0) {
+        String.format("%.1f MB", mb)
+    } else {
+        String.format("%.1f KB", kb)
+    }
 }

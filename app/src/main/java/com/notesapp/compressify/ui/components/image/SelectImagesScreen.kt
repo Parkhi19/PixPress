@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.notesapp.compressify.ui.components.common.PrimaryButton
 
 @Composable
 fun SelectImagesScreen(onImageSelect: () -> Unit, modifier: Modifier = Modifier) {
@@ -21,21 +22,11 @@ fun SelectImagesScreen(onImageSelect: () -> Unit, modifier: Modifier = Modifier)
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        ElevatedButton(
-            onClick = { onImageSelect() },
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(0.7f)
-            ) {
-                Text(
-                    text = "Select a File to Compress",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
+        PrimaryButton(
+            onClick = onImageSelect,
+            buttonText = "Select Images to Compress",
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
+        )
 
 
     }

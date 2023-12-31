@@ -5,5 +5,5 @@ import androidx.compose.ui.text.font.FontFamily
 import com.notesapp.compressify.R
 
 val primaryFont = FontFamily(
-    Font(R.font.railway_medium)
+    Font(R.font.montserrat_medium)
 )

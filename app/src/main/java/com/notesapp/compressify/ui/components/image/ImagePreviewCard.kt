@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -26,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
 fun ImagePreviewCard(modifier: Modifier = Modifier, image: ImageModel, onDeleteClick: (String) -> Unit) {
@@ -58,11 +60,11 @@ fun ImagePreviewCard(modifier: Modifier = Modifier, image: ImageModel, onDeleteC
             ) {
                 Column(modifier = Modifier.weight(8f)) {
                     Text(text = image.name, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(text = image.size.toString(), style = MaterialTheme.typography.bodySmall)
+                    Text(text = image.size.getFormattedSize(), style = MaterialTheme.typography.bodySmall)
                 }
                 IconButton(onClick = { onDeleteClick(image.uri.path.toString()) }) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        imageVector = Icons.Default.Close,
                         contentDescription = "",
                         modifier = Modifier.weight(2f)
                     )

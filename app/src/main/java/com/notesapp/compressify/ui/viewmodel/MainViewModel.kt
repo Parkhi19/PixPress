@@ -41,7 +41,7 @@ class MainViewModel @Inject constructor(
 
 
 
-    fun onImageCompressionOptionsConfirm(resolution: Float, quality: Float, keepOriginal: Boolean) {
+    private fun onImageCompressionOptionsConfirm(resolution: Float, quality: Float, keepOriginal: Boolean) {
         viewModelScope.launch {
             compressAndSaveImagesUseCase.launch(
                 CompressAndSaveImagesUseCase.Params(

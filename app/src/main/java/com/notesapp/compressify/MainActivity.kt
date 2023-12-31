@@ -17,9 +17,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHost
+import androidx.navigation.compose.composable
 import com.notesapp.compressify.domain.model.Event
+import com.notesapp.compressify.domain.model.ImageCompressionScreen
 import com.notesapp.compressify.ui.components.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.image.CompressImageScreen
+import com.notesapp.compressify.ui.components.image.SelectImagesScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,6 +40,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             var showCompressionCompletedDialog by remember {
                 mutableStateOf(false)
             }
@@ -56,16 +63,21 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CompressImageScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        selectedImages = selectedImages,
-                        onImageSelectClick = {
-                            selectedPhotoLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    NavHost(
+                        navController = navController,
+                        startDestination = ImageCompressionScreen.SELECT_IMAGES.name,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        composable(ImageCompressionScreen.SELECT_IMAGES.name) {
+                            CompressImageScreen(
+                                selectedImages = selectedImages,
+                                onImageSelectClick = {
+                                    selectedPhotoLauncher.launch(PickVisualMediaRequest())
+                                },
+                                onUIEvent = viewModel::onUIEvent
                             )
-                        },
-                        onUIEvent = viewModel::onUIEvent
-                    )
+                        }
+                    }
                     if (showCompressionCompletedDialog) {
                         CompressionCompletedDialog(
                             modifier = Modifier
@@ -76,12 +88,12 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
             }
+
         }
 
     }
-
-
 }
 
 

@@ -1,9 +1,11 @@
 package com.notesapp.compressify.ui.components.common
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.notesapp.compressify.R
@@ -35,28 +39,39 @@ fun CompressionCompletedDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(24.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Compression Completed",
+                        text = "Compression Completed !",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold
-                        )
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterVertically)
+                            .size(24.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                 }
-                Icon(
-                    painter = painterResource(id = R.drawable.done),
-                    contentDescription = "Close",
-                    tint = primaryColor,
+                Image(
+                    painter = painterResource(id = R.drawable.completed),
+                    contentDescription = "Compression Completed",
                     modifier = Modifier
-                        .size(128.dp)
-                        .padding(8.dp)
+                        .size(68.dp)
                         .align(Alignment.CenterHorizontally)
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewC() {
+    CompressionCompletedDialog {
+
     }
 }
 

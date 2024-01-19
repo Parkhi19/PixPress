@@ -23,23 +23,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavHost
 import androidx.navigation.compose.composable
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageCompressionScreen
+import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.common.BottomBar
 import com.notesapp.compressify.ui.components.common.CompressionCompletedDialog
+import com.notesapp.compressify.ui.components.common.HomeScreen
 import com.notesapp.compressify.ui.components.image.CompressImageScreen
 import com.notesapp.compressify.ui.components.image.SelectImagesScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
+import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), NavController.OnDestinationChangedListener {
 
     private val viewModel by viewModels<MainViewModel>()
     private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
@@ -62,46 +68,72 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+            LaunchedEffect(key1 = Unit ){
+                navController.addOnDestinationChangedListener(this@MainActivity)
+                viewModel.currentRoute.collectLatest { route ->
+                    navController.navigate(route.name)
+                }
+            }
             selectedPhotoLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
                 onResult = { viewModel.onImageSelected(it) }
             )
             CompressifyTheme {
                 val selectedImages by viewModel.selectedImages.collectAsState()
-                Scaffold(topBar = {}, bottomBar = {BottomBar(modifier = Modifier.fillMaxWidth())}) {
-                    Surface(
-                        modifier = Modifier
-                            .padding(it)
-                            .fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = NavigationRoutes.HOME.name,
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = ImageCompressionScreen.SELECT_IMAGES.name,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            composable(ImageCompressionScreen.SELECT_IMAGES.name) {
-                                CompressImageScreen(
-                                    selectedImages = selectedImages,
-                                    onImageSelectClick = {
-                                        selectedPhotoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                                    },
-                                    onUIEvent = viewModel::onUIEvent
-                                )
-                            }
-                        }
-                        if (showCompressionCompletedDialog) {
-                            CompressionCompletedDialog(
+                        composable(NavigationRoutes.HOME.name) {
+                            HomeScreen(
                                 modifier = Modifier
-                                    .height(300.dp)
-                                    .width(300.dp),
-                            ) {
-                                showCompressionCompletedDialog = false
-                            }
+                                    .fillMaxSize(),
+                                onUIEvent = viewModel::onUIEvent
+                            )
+                        }
+
+                        composable(NavigationRoutes.COMPRESS_IMAGE.name) {
+                            CompressImageScreen(
+                                selectedImages = selectedImages,
+                                onImageSelectClick = {
+                                    selectedPhotoLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                },
+                                onUIEvent = viewModel::onUIEvent
+                            )
+                        }
+
+                    }
+                    if (showCompressionCompletedDialog) {
+                        CompressionCompletedDialog(
+                            modifier = Modifier
+                                .height(300.dp)
+                                .width(300.dp),
+                        ) {
+                            showCompressionCompletedDialog = false
                         }
                     }
                 }
             }
+        }
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        destination.route?.let {
+            viewModel.onUIEvent(UIEvent.Navigate(NavigationRoutes.valueOf(it)))
         }
     }
 }

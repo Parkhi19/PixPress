@@ -1,5 +1,7 @@
 package com.notesapp.compressify.util
 
+import com.notesapp.compressify.domain.model.NavigationRoutes
+
 sealed interface UIEvent {
     sealed interface Images : UIEvent {
 
@@ -10,4 +12,5 @@ sealed interface UIEvent {
             val keepOriginal: Boolean
         ) : Images
     }
+    data class Navigate(val route : NavigationRoutes) : UIEvent
 }

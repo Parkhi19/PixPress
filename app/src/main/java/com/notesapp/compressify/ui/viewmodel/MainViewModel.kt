@@ -9,6 +9,7 @@ import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -25,16 +26,22 @@ class MainViewModel @Inject constructor(
     private val _selectedImages = MutableStateFlow<List<ImageModel>>(emptyList())
     val selectedImages = _selectedImages.asStateFlow()
 
+    private val _selectedImagesProcessing = MutableStateFlow(false)
+    val selectedImagesProcessing = _selectedImagesProcessing.asStateFlow()
+
+
     private val eventChannel = Channel<Event> {  }
     val eventsFlow = eventChannel.receiveAsFlow()
 
     fun onImageSelected(uris: List<Uri>) {
-        viewModelScope.launch{
+        viewModelScope.launch(Dispatchers.IO){
+            _selectedImagesProcessing.value = true
             _selectedImages.value = uris.map {
                 async {
                     ImageModel(uri = it)
                 }
             }.awaitAll()
+            _selectedImagesProcessing.value = false
         }
 
     }

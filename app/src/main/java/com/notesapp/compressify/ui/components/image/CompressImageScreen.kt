@@ -12,15 +12,16 @@ fun CompressImageScreen(
     selectedImages: List<ImageModel>,
     onImageSelectClick: () -> Unit,
     onUIEvent: (UIEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isImageProcessing : Boolean = false,
 ) {
     if (selectedImages.isEmpty()) {
-        SelectImagesScreen(onImageSelect = onImageSelectClick, modifier = Modifier.fillMaxSize())
+        SelectImagesScreen(onImageSelect = onImageSelectClick, modifier = Modifier.fillMaxSize(), isImageProcessing = isImageProcessing)
     } else {
         CompressOptionsScreen(
             selectedImages = selectedImages,
             modifier = Modifier.fillMaxSize(),
-            onUIEvent = onUIEvent
+            onUIEvent = onUIEvent,
         )
     }
 }

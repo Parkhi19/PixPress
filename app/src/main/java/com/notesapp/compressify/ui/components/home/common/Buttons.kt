@@ -1,4 +1,4 @@
-package com.notesapp.compressify.ui.components.common
+package com.notesapp.compressify.ui.components.home.common
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Button

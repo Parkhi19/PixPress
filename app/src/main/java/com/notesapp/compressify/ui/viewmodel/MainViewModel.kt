@@ -21,10 +21,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val compressAndSaveImagesUseCase: CompressAndSaveImagesUseCase
+    private val compressAndSaveImagesUseCase: CompressAndSaveImagesUseCase,
+    private val compressAndSaveVideosUseCase: CompressAndSaveVideoUseCase,
+    private val G: GetCategoryStorageUseCase
 ) : ViewModel() {
     private val _selectedImages = MutableStateFlow<List<ImageModel>>(emptyList())
     val selectedImages = _selectedImages.asStateFlow()
+
+    private val _selectedVideos = MutableStateFlow<List<VideoModel>>(emptyList())
+    val selectedVideos = _selectedVideos.asStateFlow()
 
     private val _selectedImagesProcessing = MutableStateFlow(false)
     val selectedImagesProcessing = _selectedImagesProcessing.asStateFlow()
@@ -46,6 +51,19 @@ class MainViewModel @Inject constructor(
 
     }
 
+    fun onVideoSelected(uris: List<Uri>) {
+        viewModelScope.launch(Dispatchers.IO){
+            compressAndSaveVideosUseCase.launch(CompressAndSaveVideoUseCase.Params(uris))
+//            _selectedVideosProcessing.value = true
+//            _selectedVideos.value = uris.map {
+//                async {
+//                    VideoModel(uri = it)
+//                }
+//            }.awaitAll()
+//            _selectedVideosProcessing.value = false
+        }
+
+    }
 
 
     private fun onImageCompressionOptionsConfirm(resolution: Float, quality: Float, keepOriginal: Boolean) {
@@ -74,6 +92,10 @@ class MainViewModel @Inject constructor(
             }
             is UIEvent.Images.CompressionOptionsConfirmed -> {
                 onImageCompressionOptionsConfirm(event.resolution, event.quality, event.keepOriginal)
+            }
+
+            is UIEvent.Navigate -> {
+                _currentRoute.value = event.route
             }
         }
     }

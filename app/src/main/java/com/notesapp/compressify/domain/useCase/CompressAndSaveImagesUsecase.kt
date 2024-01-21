@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import javax.inject.Inject
 
-class CompressAndSaveImagesUseCase @Inject constructor(): BaseUseCase<CompressAndSaveImagesUseCase.Params>() {
+class CompressAndSaveImagesUseCase @Inject constructor(): BaseUseCase<CompressAndSaveImagesUseCase.Params, Unit>() {
     data class Params(
         val context: Context,
         val uris: List<Uri>,

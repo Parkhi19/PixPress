@@ -26,7 +26,7 @@ fun CustomCircularProgress(
         CircularProgressIndicator(
             modifier = Modifier.fillMaxSize(),
             color = primaryColor,
-            strokeWidth = 4.dp,
+            strokeWidth = 8.dp,
             progress = { progress / 100 },
             trackColor = primaryTintedColor,
             strokeCap = StrokeCap.Round
@@ -34,7 +34,7 @@ fun CustomCircularProgress(
         if (showText) {
             Text(
                 text = "${progress}%",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 color = primaryColor
             )
         }

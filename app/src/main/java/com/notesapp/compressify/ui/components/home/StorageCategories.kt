@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,9 +25,8 @@ import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
 fun StorageCategories(modifier: Modifier = Modifier, categoryModelList: List<CategoryModel>) {
-    LazyColumn(modifier = modifier) {
-        items(categoryModelList.size) {
-            val category = categoryModelList[it]
+    Column(modifier = modifier) {
+        categoryModelList.forEach { category ->
             StorageCategory(
                 modifier = Modifier
                     .fillMaxWidth()

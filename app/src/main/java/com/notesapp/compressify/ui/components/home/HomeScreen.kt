@@ -1,6 +1,13 @@
 package com.notesapp.compressify.ui.components.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -25,9 +33,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.ui.components.home.common.BottomBar
 import com.notesapp.compressify.ui.components.home.common.CustomCircularProgress
@@ -36,6 +47,7 @@ import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.FileUtil
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getFormattedSize
+import com.notesapp.compressify.domain.model.NavigationRoutes
 
 @Composable
 fun HomeScreen(
@@ -48,14 +60,14 @@ fun HomeScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 18.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CustomCircularProgress(
                 progress = 64.4f,
                 modifier = Modifier
-                    .padding(16.dp)
-                    .size(64.dp)
+                    .padding(horizontal = 16.dp)
+                    .size(96.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
@@ -86,9 +98,14 @@ fun HomeScreen(
             }
         }
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
             Text(
-                text = if(showMore) "Show Less" else "Show More",
+                text = if (showMore) "Show Less" else "Show More",
                 style = MaterialTheme.typography.bodyLarge,
                 color = primaryColor,
                 modifier = Modifier
@@ -97,22 +114,49 @@ fun HomeScreen(
 
             )
         }
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(color = primaryTintedColor)
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(color = primaryTintedColor)
         )
-        AnimatedVisibility(visible = showMore) {
+        AnimatedVisibility(
+            visible = showMore,
+            modifier = Modifier,
+        ) {
             StorageCategories(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 24.dp),
                 categoryModelList = categories
             )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Card(modifier = Modifier
+                .padding(16.dp)
+
+                .clickable { onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_IMAGE)) }
+            ) {
+                Column(modifier = Modifier) {
+                    Image(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_compress_image),
+                        contentDescription = "Compress Image"
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "Compress Image", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
         }
     }
 
 }
+
 
 @Preview
 @Composable

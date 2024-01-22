@@ -1,6 +1,5 @@
-package com.notesapp.compressify.ui.components.common
+package com.notesapp.compressify.ui.components.home.common
 
-import android.view.MenuItem
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,19 +21,21 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.R
+import com.notesapp.compressify.domain.model.NavigationRoutes
+import com.notesapp.compressify.util.UIEvent
 
 @Composable
-fun BottomBar(modifier: Modifier = Modifier) {
+fun BottomBar(modifier: Modifier = Modifier, onUIEvent: (UIEvent) -> Unit) {
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         modifier = modifier.shadow(4.dp),
         actions = {
             MenuItem(icon = R.drawable.compress_photo, text = "Photo") {
-
+                onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_IMAGE))
             }
             MenuItem(icon = R.drawable.compress_video, text = "Video") {
-
+                onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_VIDEO))
             }
         }
 

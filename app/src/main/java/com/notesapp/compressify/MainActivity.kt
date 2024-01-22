@@ -1,8 +1,11 @@
 package com.notesapp.compressify
 
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,14 +14,11 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -27,16 +27,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavHost
 import androidx.navigation.compose.composable
 import com.notesapp.compressify.domain.model.Event
-import com.notesapp.compressify.domain.model.ImageCompressionScreen
 import com.notesapp.compressify.domain.model.NavigationRoutes
-import com.notesapp.compressify.ui.components.common.BottomBar
-import com.notesapp.compressify.ui.components.common.CompressionCompletedDialog
-import com.notesapp.compressify.ui.components.common.HomeScreen
+import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
+import com.notesapp.compressify.ui.components.home.HomeScreen
 import com.notesapp.compressify.ui.components.image.CompressImageScreen
-import com.notesapp.compressify.ui.components.image.SelectImagesScreen
+import com.notesapp.compressify.ui.components.video.SelectVideoScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
@@ -79,13 +76,15 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
                 onResult = { viewModel.onImageSelected(it) }
             )
+            selectedVideoLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.PickMultipleVisualMedia(),
+                onResult = { viewModel.onVideoSelected(it) }
+            )
             CompressifyTheme {
                 val selectedImages by viewModel.selectedImages.collectAsState()
                 val categories by viewModel.categoryStorage.collectAsState()
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     NavHost(
                         navController = navController,
@@ -94,7 +93,9 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                     ) {
                         composable(NavigationRoutes.HOME.name) {
                             HomeScreen(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(state = rememberScrollState()),
                                 categories = categories,
                                 onUIEvent = viewModel::onUIEvent
                             )
@@ -111,6 +112,26 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                                     )
                                 },
                                 onUIEvent = viewModel::onUIEvent
+                            )
+                        }
+
+                        composable(NavigationRoutes.COMPRESS_VIDEO.name) {
+                            SelectVideoScreen(
+                                onVideoSelect = {
+                                    selectedVideoLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.VideoOnly
+                                        )
+                                    )
+                                    if(Build.VERSION.SDK_INT >= 30){
+                                        if(!Environment.isExternalStorageManager()){
+                                            val getVideoPermission = Intent()
+                                            getVideoPermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                                            startActivity(getVideoPermission)
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
 

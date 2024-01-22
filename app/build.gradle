@@ -44,6 +44,10 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += '/META-INF/LGPL2.1'
+            excludes += "builddef.lst"
+            excludes += "version.txt"
+            excludes +="isoparser-default.properties"
         }
         pickFirst 'lib/arm64-v8a/libc++_shared.so'
         pickFirst 'lib/x86_64/libc++_shared.so'
@@ -63,6 +67,7 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
+    implementation 'com.google.android.material:material:1.11.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -86,6 +91,11 @@ dependencies {
     implementation "com.airbnb.android:lottie-compose:$lottie_version"
     implementation "com.airbnb.android:lottie-compose:6.0.1"
     implementation "androidx.compose.material3:material3:1.2.0-beta02"
+    implementation("com.iceteck.silicompressorr:silicompressor:2.2.4")
+    implementation("org.mp4parser:isoparser:1.9.41")
+    implementation ("org.mp4parser:muxer:1.9.41")
+    implementation("com.googlecode.mp4parser:isoparser:1.1.22")
+
 
 }
 kapt {

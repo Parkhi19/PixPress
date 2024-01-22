@@ -17,14 +17,12 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = primaryColor,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    surface = darkSurface
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = primaryColor,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    surface = lightSurface
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -57,8 +55,8 @@ fun CompressifyTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = colorScheme.surface.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

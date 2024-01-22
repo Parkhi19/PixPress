@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.ui.components.home.common.CustomCircularProgress
+import com.notesapp.compressify.ui.components.home.common.PrimaryButtonOutlined
 import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.FileUtil
@@ -128,8 +129,15 @@ fun HomeScreen(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.weight(1f))
+        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Go to Library") {
+
+        }
+
     }
 }
+
 
 @Composable
 fun CompressOptionItem(

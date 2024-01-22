@@ -117,37 +117,11 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                         }
 
                         composable(NavigationRoutes.COMPRESS_IMAGE.name) {
-                            CompressImageScreen(
-                                selectedImages = selectedImages,
-                                onImageSelectClick = {
-                                    selectedPhotoLauncher.launch(
-                                        PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                                        )
-                                    )
-                                },
-                                onUIEvent = viewModel::onUIEvent
-                            )
+
                         }
 
                         composable(NavigationRoutes.COMPRESS_VIDEO.name) {
-                            SelectVideoScreen(
-                                onVideoSelect = {
-                                    selectedVideoLauncher.launch(
-                                        PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.VideoOnly
-                                        )
-                                    )
-                                    if(Build.VERSION.SDK_INT >= 30){
-                                        if(!Environment.isExternalStorageManager()){
-                                            val getVideoPermission = Intent()
-                                            getVideoPermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                                            startActivity(getVideoPermission)
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.fillMaxSize()
-                            )
+
                         }
 
                     }

@@ -4,9 +4,15 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notesapp.compressify.CompressApplication
+import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.domain.model.NavigationRoutes
+import com.notesapp.compressify.domain.model.VideoModel
+import com.notesapp.compressify.domain.useCase.BaseUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
+import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
+import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
 import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,8 +29,12 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val compressAndSaveImagesUseCase: CompressAndSaveImagesUseCase,
     private val compressAndSaveVideosUseCase: CompressAndSaveVideoUseCase,
-    private val G: GetCategoryStorageUseCase
+    private val getCategoryStorageUseCase: GetCategoryStorageUseCase
 ) : ViewModel() {
+
+    private val _categoryStorage = MutableStateFlow<List<CategoryModel>>(emptyList())
+    val categoryStorage = _categoryStorage.asStateFlow()
+
     private val _selectedImages = MutableStateFlow<List<ImageModel>>(emptyList())
     val selectedImages = _selectedImages.asStateFlow()
 
@@ -34,9 +44,15 @@ class MainViewModel @Inject constructor(
     private val _selectedImagesProcessing = MutableStateFlow(false)
     val selectedImagesProcessing = _selectedImagesProcessing.asStateFlow()
 
+    private val _selectedVideosProcessing = MutableStateFlow(false)
+    val selectedVideosProcessing = _selectedVideosProcessing.asStateFlow()
+
+    private val _currentRoute = MutableStateFlow(NavigationRoutes.HOME)
+    val currentRoute = _currentRoute.asStateFlow()
 
     private val eventChannel = Channel<Event> {  }
     val eventsFlow = eventChannel.receiveAsFlow()
+
 
     fun onImageSelected(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO){
@@ -51,18 +67,15 @@ class MainViewModel @Inject constructor(
 
     }
 
+    fun syncStorageCategory(){
+        viewModelScope.launch {
+            _categoryStorage.value = getCategoryStorageUseCase.launch(BaseUseCase.Parameters())
+        }
+    }
     fun onVideoSelected(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO){
             compressAndSaveVideosUseCase.launch(CompressAndSaveVideoUseCase.Params(uris))
-//            _selectedVideosProcessing.value = true
-//            _selectedVideos.value = uris.map {
-//                async {
-//                    VideoModel(uri = it)
-//                }
-//            }.awaitAll()
-//            _selectedVideosProcessing.value = false
         }
-
     }
 
 
@@ -82,6 +95,8 @@ class MainViewModel @Inject constructor(
             sendEvent(Event.CompressionCompleted)
         }
     }
+
+
 
     fun  onUIEvent(event: UIEvent) {
         when(event) {

@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
     private val viewModel by viewModels<MainViewModel>()
     private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
+    private lateinit var selectedVideoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +81,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
             )
             CompressifyTheme {
                 val selectedImages by viewModel.selectedImages.collectAsState()
+                val categories by viewModel.categoryStorage.collectAsState()
                 Surface(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -92,8 +94,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                     ) {
                         composable(NavigationRoutes.HOME.name) {
                             HomeScreen(
-                                modifier = Modifier
-                                    .fillMaxSize(),
+                                modifier = Modifier.fillMaxSize(),
+                                categories = categories,
                                 onUIEvent = viewModel::onUIEvent
                             )
                         }
@@ -135,6 +137,11 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
         destination.route?.let {
             viewModel.onUIEvent(UIEvent.Navigate(NavigationRoutes.valueOf(it)))
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.syncStorageCategory()
     }
 }
 

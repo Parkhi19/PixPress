@@ -4,7 +4,10 @@ import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.util.getAllAudioFilesSize
+import com.notesapp.compressify.util.getAllDocumentSize
+import com.notesapp.compressify.util.getAllImageFilesSize
 import com.notesapp.compressify.util.getAllVideoFilesSize
+import com.notesapp.compressify.util.getOtherFilesSize
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -60,7 +63,7 @@ class GetCategoryStorageUseCase @Inject constructor() : BaseUseCase<BaseUseCase.
                 )
             }
             CategoryModel.CategoryType.IMAGE -> {
-                val size = CompressApplication.appContext.getAllAudioFilesSize()
+                val size = CompressApplication.appContext.getAllImageFilesSize()
                 val icon = R.drawable.ic_category_image
                 CategoryModel(
                     icon,
@@ -69,7 +72,7 @@ class GetCategoryStorageUseCase @Inject constructor() : BaseUseCase<BaseUseCase.
                 )
             }
             CategoryModel.CategoryType.DOCUMENT -> {
-                val size = CompressApplication.appContext.getAllAudioFilesSize()
+                val size = CompressApplication.appContext.getAllDocumentSize()
                 val icon = R.drawable.ic_category_document
                 CategoryModel(
                     icon,
@@ -78,7 +81,7 @@ class GetCategoryStorageUseCase @Inject constructor() : BaseUseCase<BaseUseCase.
                 )
             }
             CategoryModel.CategoryType.OTHER -> {
-                val size = CompressApplication.appContext.getAllAudioFilesSize()
+                val size = CompressApplication.appContext.getOtherFilesSize()
                 val icon = R.drawable.ic_category_other
                 CategoryModel(
                     icon,

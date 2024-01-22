@@ -57,14 +57,29 @@ fun Context.getAllAudioFilesSize(): Long {
     val projection = arrayOf(
         MediaStore.Audio.Media.SIZE
     )
-    val query = contentResolver.query(
+    val externalQuery = contentResolver.query(
         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
         projection,
         null,
         null,
         null
     )
-    query?.use { cursor ->
+    val internalQuery = contentResolver.query(
+        MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+        projection,
+        null,
+        null,
+        null
+    )
+    internalQuery?.use { cursor->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalAudioSize += size
+        }
+    }
+    externalQuery?.use { cursor ->
         val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
         while (cursor.moveToNext()) {
 
@@ -80,14 +95,29 @@ fun Context.getAllVideoFilesSize(): Long {
     val projection = arrayOf(
         MediaStore.Video.Media.SIZE
     )
-    val query = contentResolver.query(
+    val externalQuery = contentResolver.query(
         MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
         projection,
         null,
         null,
         null
     )
-    query?.use { cursor ->
+    val internalQuery = contentResolver.query(
+        MediaStore.Video.Media.INTERNAL_CONTENT_URI,
+        projection,
+        null,
+        null,
+        null
+    )
+    internalQuery?.use { cursor ->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalVideoSize += size
+        }
+    }
+    externalQuery?.use { cursor ->
         val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
         while (cursor.moveToNext()) {
 
@@ -103,14 +133,29 @@ fun Context.getAllImageFilesSize(): Long {
     val projection = arrayOf(
         MediaStore.Images.Media.SIZE
     )
-    val query = contentResolver.query(
+    val externalQuery = contentResolver.query(
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         projection,
         null,
         null,
         null
     )
-    query?.use { cursor ->
+    val internalQuery = contentResolver.query(
+        MediaStore.Images.Media.INTERNAL_CONTENT_URI,
+        projection,
+        null,
+        null,
+        null
+    )
+    internalQuery?.use { cursor ->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalImageSize += size
+        }
+    }
+    externalQuery?.use { cursor ->
         val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
         while (cursor.moveToNext()) {
 
@@ -124,19 +169,33 @@ fun Context.getAllImageFilesSize(): Long {
 fun Context.getAllDocumentSize(): Long {
     var totalDocumentSize = 0L
     val projection = arrayOf(
-        MediaStore.Files.FileColumns.SIZE,
-        MediaStore.Files.FileColumns.MIME_TYPE
+        MediaStore.Files.FileColumns.SIZE
     )
     val selection = "${MediaStore.Audio.Media.MIME_TYPE} == ?"
     val selectionArgs = arrayOf("application/pdf")
-    val query = contentResolver.query(
+    val externalQuery = contentResolver.query(
         MediaStore.Files.getContentUri("external"),
         projection,
         selection,
         selectionArgs,
         null
     )
-    query?.use { cursor ->
+    val internalQuery = contentResolver.query(
+        MediaStore.Files.getContentUri("internal"),
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )
+    internalQuery?.use { cursor ->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalDocumentSize += size
+        }
+    }
+    externalQuery?.use { cursor ->
         val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
         while (cursor.moveToNext()) {
 

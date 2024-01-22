@@ -6,7 +6,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import com.notesapp.compressify.CompressApplication
-import kotlin.math.roundToInt
 
 
 fun Uri.createThumbnail(): Bitmap {
@@ -58,9 +57,6 @@ fun Context.getAllAudioFilesSize(): Long {
     val projection = arrayOf(
         MediaStore.Audio.Media.SIZE
     )
-//    val selection = "${MediaStore.Audio.Media.DURATION} >= ?"
-//    val selectionArgs = arrayOf("30000")
-//    val sortOrder = "${MediaStore.Audio.Media.DISPLAY_NAME} ASC"
     val query = contentResolver.query(
         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
         projection,
@@ -79,4 +75,79 @@ fun Context.getAllAudioFilesSize(): Long {
     return totalAudioSize
 }
 
+fun Context.getAllVideoFilesSize(): Long {
+    var totalVideoSize = 0L
+    val projection = arrayOf(
+        MediaStore.Video.Media.SIZE
+    )
+    val query = contentResolver.query(
+        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        projection,
+        null,
+        null,
+        null
+    )
+    query?.use { cursor ->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalVideoSize += size
+        }
+    }
+    return totalVideoSize
+}
+
+fun Context.getAllImageFilesSize(): Long {
+    var totalImageSize = 0L
+    val projection = arrayOf(
+        MediaStore.Images.Media.SIZE
+    )
+    val query = contentResolver.query(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        projection,
+        null,
+        null,
+        null
+    )
+    query?.use { cursor ->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalImageSize += size
+        }
+    }
+    return totalImageSize
+}
+
+fun Context.getAllDocumentSize(): Long {
+    var totalDocumentSize = 0L
+    val projection = arrayOf(
+        MediaStore.Files.FileColumns.SIZE,
+        MediaStore.Files.FileColumns.MIME_TYPE
+    )
+    val selection = "${MediaStore.Audio.Media.MIME_TYPE} == ?"
+    val selectionArgs = arrayOf("application/pdf")
+    val query = contentResolver.query(
+        MediaStore.Files.getContentUri("external"),
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )
+    query?.use { cursor ->
+        val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
+        while (cursor.moveToNext()) {
+
+            val size = cursor.getLong(sizeColumn)
+            totalDocumentSize += size
+        }
+    }
+    return totalDocumentSize
+}
+
+fun Context.getOtherFilesSize(): Long {
+    return FileUtil.occupiedStorageSize - getAllAudioFilesSize() - getAllVideoFilesSize() - getAllImageFilesSize() - getAllDocumentSize()
+}
 

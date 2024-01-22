@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        checkForStoragePermissions()
         setContent {
             val navController = rememberNavController()
             var showCompressionCompletedDialog by remember {
@@ -97,6 +98,20 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                                     .fillMaxSize()
                                     .verticalScroll(state = rememberScrollState()),
                                 categories = categories,
+                                onCompressImageClick = {
+                                    selectedPhotoLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                },
+                                onCompressVideoClick = {
+                                    selectedVideoLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.VideoOnly
+                                        )
+                                    )
+                                },
                                 onUIEvent = viewModel::onUIEvent
                             )
                         }
@@ -163,6 +178,16 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
     override fun onResume() {
         super.onResume()
         viewModel.syncStorageCategory()
+    }
+
+    private fun checkForStoragePermissions() {
+        if(Build.VERSION.SDK_INT >= 30){
+            if(!Environment.isExternalStorageManager()){
+                val getStoragePermission = Intent()
+                getStoragePermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                startActivity(getStoragePermission)
+            }
+        }
     }
 }
 

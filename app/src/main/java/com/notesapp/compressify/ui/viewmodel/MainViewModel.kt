@@ -50,12 +50,13 @@ class MainViewModel @Inject constructor(
     private val _currentRoute = MutableStateFlow(NavigationRoutes.HOME)
     val currentRoute = _currentRoute.asStateFlow()
 
-    private val eventChannel = Channel<Event> {  }
+    private val eventChannel = Channel<Event> { }
     val eventsFlow = eventChannel.receiveAsFlow()
 
 
     fun onImageSelected(uris: List<Uri>) {
-        viewModelScope.launch(Dispatchers.IO){
+        onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_IMAGE))
+        viewModelScope.launch(Dispatchers.IO) {
             _selectedImagesProcessing.value = true
             _selectedImages.value = uris.map {
                 async {
@@ -67,19 +68,39 @@ class MainViewModel @Inject constructor(
 
     }
 
-    fun syncStorageCategory(){
+    private fun onImageAdded(uris: List<Uri>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _selectedImagesProcessing.value = true
+            _selectedImages.value = _selectedImages.value + uris.filter {
+                uri -> _selectedImages.value.none { it.uri.path == uri.path }
+            }.map {
+                async {
+                    ImageModel(uri = it)
+                }
+            }.awaitAll()
+            _selectedImagesProcessing.value = false
+        }
+
+    }
+
+    fun syncStorageCategory() {
         viewModelScope.launch {
             _categoryStorage.value = getCategoryStorageUseCase.launch(BaseUseCase.Parameters())
         }
     }
+
     fun onVideoSelected(uris: List<Uri>) {
-        viewModelScope.launch(Dispatchers.IO){
+        viewModelScope.launch(Dispatchers.IO) {
             compressAndSaveVideosUseCase.launch(CompressAndSaveVideoUseCase.Params(uris))
         }
     }
 
 
-    private fun onImageCompressionOptionsConfirm(resolution: Float, quality: Float, keepOriginal: Boolean) {
+    private fun onImageCompressionOptionsConfirm(
+        resolution: Float,
+        quality: Float,
+        keepOriginal: Boolean
+    ) {
         viewModelScope.launch {
             compressAndSaveImagesUseCase.launch(
                 CompressAndSaveImagesUseCase.Params(
@@ -97,25 +118,33 @@ class MainViewModel @Inject constructor(
     }
 
 
-
-    fun  onUIEvent(event: UIEvent) {
-        when(event) {
+    fun onUIEvent(event: UIEvent) {
+        when (event) {
             is UIEvent.Images.RemoveImageClicked -> {
                 _selectedImages.value = _selectedImages.value.filter {
                     it.uri.path != event.path
                 }
             }
+
             is UIEvent.Images.CompressionOptionsConfirmed -> {
-                onImageCompressionOptionsConfirm(event.resolution, event.quality, event.keepOriginal)
+                onImageCompressionOptionsConfirm(
+                    event.resolution,
+                    event.quality,
+                    event.keepOriginal
+                )
             }
 
             is UIEvent.Navigate -> {
                 _currentRoute.value = event.route
             }
+
+            is UIEvent.Images.OnImagesAdded -> {
+                onImageAdded(event.uris)
+            }
         }
     }
 
-   private fun sendEvent(event: Event) {
+    private fun sendEvent(event: Event) {
         viewModelScope.launch {
             eventChannel.send(event)
         }

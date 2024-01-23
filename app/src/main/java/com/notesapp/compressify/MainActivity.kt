@@ -1,5 +1,6 @@
 package com.notesapp.compressify
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -32,7 +33,7 @@ import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.home.HomeScreen
-import com.notesapp.compressify.ui.components.image.CompressImageScreen
+import com.notesapp.compressify.ui.components.image.CompressOptionsScreen
 import com.notesapp.compressify.ui.components.video.SelectVideoScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                     }
                 }
             }
-            LaunchedEffect(key1 = Unit ){
+            LaunchedEffect(key1 = Unit) {
                 navController.addOnDestinationChangedListener(this@MainActivity)
                 viewModel.currentRoute.collectLatest { route ->
                     navController.navigate(route.name)
@@ -117,7 +118,11 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                         }
 
                         composable(NavigationRoutes.COMPRESS_IMAGE.name) {
-
+                            CompressOptionsScreen(
+                                selectedImages = selectedImages,
+                                onUIEvent = viewModel::onUIEvent,
+                                modifier = Modifier.fillMaxSize()
+                            )
                         }
 
                         composable(NavigationRoutes.COMPRESS_VIDEO.name) {
@@ -155,8 +160,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
     }
 
     private fun checkForStoragePermissions() {
-        if(Build.VERSION.SDK_INT >= 30){
-            if(!Environment.isExternalStorageManager()){
+        if (Build.VERSION.SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
                 val getStoragePermission = Intent()
                 getStoragePermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
                 startActivity(getStoragePermission)

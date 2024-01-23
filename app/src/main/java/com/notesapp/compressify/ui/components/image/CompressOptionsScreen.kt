@@ -7,10 +7,14 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,8 +27,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -50,6 +57,7 @@ import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.ui.components.home.common.PrimaryButton
 import com.notesapp.compressify.ui.components.home.common.PrimaryImageButton
 import com.notesapp.compressify.ui.theme.primaryColor
+import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getFormattedSize
@@ -58,6 +66,7 @@ import com.notesapp.compressify.util.getFormattedSize
 fun CompressOptionsScreen(
     modifier: Modifier = Modifier,
     selectedImages: List<ImageModel>,
+    isImageProcessing: Boolean,
     onUIEvent: (UIEvent) -> Unit
 ) {
     var showDialog by remember {
@@ -68,7 +77,11 @@ fun CompressOptionsScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { onUIEvent(UIEvent.Images.OnImagesAdded(it)) }
     )
-
+    if (isImageProcessing) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(modifier = Modifier.size(48.dp), color = primaryColor)
+        }
+    }
     Column(modifier = modifier) {
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
@@ -138,25 +151,33 @@ fun CompressOptionsScreen(
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_resolution),
-                contentDescription = "",
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.width(24.dp))
-            PrimaryButton(
-                onClick = { /*TODO*/ },
-                buttonText = "Continue",
-                modifier = Modifier.weight(1f)
-            )
+
+        if (selectedImages.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_resolution),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable {
+                            showDialog = true
+                        }
+                )
+                Spacer(modifier = Modifier.width(24.dp))
+                PrimaryButton(
+                    onClick = { /*TODO*/ },
+                    buttonText = "Continue",
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
         if (showDialog) {
             OpenCompressDialog(
@@ -180,13 +201,14 @@ fun CompressOptionsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OpenCompressDialog(
     modifier: Modifier,
     onDismiss: (Boolean) -> Unit,
     onConfirm: (Float, Float, Boolean) -> Unit,
 ) {
-    Dialog(onDismissRequest = { onDismiss(false) }) {
+    ModalBottomSheet(onDismissRequest = { onDismiss(false) }) {
         var resolution by remember {
             mutableFloatStateOf(0.9f)
         }
@@ -199,29 +221,58 @@ fun OpenCompressDialog(
         Card(
             shape = RoundedCornerShape(
                 size = 8.dp
-            ), modifier = modifier
+            ),
+            modifier = modifier,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.background
+            ),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Text(
                         text = "Compress Options",
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Spacer(
+                    modifier = Modifier
+                        .height(2.dp)
+                        .fillMaxWidth()
+                        .background(primaryTintedColor)
+                        .padding(vertical = 12.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "Select Resolution",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Text(
+                                text = "Select Resolution",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier
+                            )
+                            Text(
+                                text = "${(resolution * 100).toInt()} %",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                         Slider(
                             value = resolution,
                             valueRange = 0.1f..1f,
@@ -238,11 +289,21 @@ fun OpenCompressDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "Select Quality",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Text(
+                                text = "Select Quality",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                            Text(
+                                text = "${(quality * 100).toInt()} %",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                         Slider(
                             value = quality,
                             valueRange = 0.1f..1f,
@@ -268,18 +329,15 @@ fun OpenCompressDialog(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
-                Button(
-                    onClick = {
-                        onConfirm(resolution, quality, keepOriginal)
-                    }, modifier = Modifier
+                PrimaryButton(
+                    onClick = { onConfirm(resolution, quality, keepOriginal) },
+                    buttonText = "Apply",
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Text(text = "Continue")
-                }
+                        .padding(24.dp)
+                )
             }
         }
     }
-
 }
 

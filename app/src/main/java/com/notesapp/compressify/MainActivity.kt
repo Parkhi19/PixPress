@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
             CompressifyTheme {
                 val selectedImages by viewModel.selectedImages.collectAsState()
                 val categories by viewModel.categoryStorage.collectAsState()
+                val isImageProcessing by viewModel.selectedImagesProcessing.collectAsState()
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -121,7 +122,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             CompressOptionsScreen(
                                 selectedImages = selectedImages,
                                 onUIEvent = viewModel::onUIEvent,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
+                                isImageProcessing = isImageProcessing
                             )
                         }
 

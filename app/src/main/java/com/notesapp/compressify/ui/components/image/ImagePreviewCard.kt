@@ -1,7 +1,9 @@
 package com.notesapp.compressify.ui.components.image
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,13 +30,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.ui.theme.primaryColor
+import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
 fun ImagePreviewCard(modifier: Modifier = Modifier, image: ImageModel, onDeleteClick: (String) -> Unit) {
     Card(
         modifier = modifier,
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(width = 1.dp, color = primaryTintedColor)
     ) {
         Column(
             modifier = Modifier
@@ -52,7 +58,7 @@ fun ImagePreviewCard(modifier: Modifier = Modifier, image: ImageModel, onDeleteC
                 )
             }
             Row(
-                modifier = Modifier
+                modifier = Modifier.background(primaryTintedColor)
                     .fillMaxWidth()
                     .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,

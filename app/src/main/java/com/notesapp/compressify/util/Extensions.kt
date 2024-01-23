@@ -11,7 +11,7 @@ import com.notesapp.compressify.CompressApplication
 fun Uri.createThumbnail(): Bitmap {
     val thumbnail =
         MediaStore.Images.Media.getBitmap(CompressApplication.contentResolver, this).run {
-            Bitmap.createScaledBitmap(this, width / 10, height / 10, false)
+            Bitmap.createScaledBitmap(this, width / 20, height / 20, false)
         }
     return thumbnail
 }

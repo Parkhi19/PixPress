@@ -2,18 +2,30 @@ package com.notesapp.compressify.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import com.notesapp.compressify.CompressApplication
 
 
-fun Uri.createThumbnail(): Bitmap {
+fun Uri.createImageThumbnail(): Bitmap {
     val thumbnail =
         MediaStore.Images.Media.getBitmap(CompressApplication.contentResolver, this).run {
             Bitmap.createScaledBitmap(this, width / 20, height / 20, false)
         }
     return thumbnail
+}
+
+fun Uri.createVideoThumbnail(): Bitmap {
+    return try {
+        val mediaMetadataRetriever = MediaMetadataRetriever()
+        mediaMetadataRetriever.setDataSource(CompressApplication.appContext, this)
+        mediaMetadataRetriever.frameAtTime?: Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
+    } catch (e:Exception) {
+        Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
+    }
 }
 
 fun Uri.getFileName(): String {

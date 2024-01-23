@@ -1,6 +1,5 @@
 package com.notesapp.compressify
 
-import android.app.ActivityOptions
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -33,8 +31,8 @@ import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.home.HomeScreen
-import com.notesapp.compressify.ui.components.image.CompressOptionsScreen
-import com.notesapp.compressify.ui.components.video.SelectVideoScreen
+import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
+import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
@@ -86,6 +84,10 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val selectedImages by viewModel.selectedImages.collectAsState()
                 val categories by viewModel.categoryStorage.collectAsState()
                 val isImageProcessing by viewModel.selectedImagesProcessing.collectAsState()
+
+                val selectedVideos by viewModel.selectedVideos.collectAsState()
+                val isVideoProcessing by viewModel.selectedVideosProcessing.collectAsState()
+
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -119,7 +121,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                         }
 
                         composable(NavigationRoutes.COMPRESS_IMAGE.name) {
-                            CompressOptionsScreen(
+                            CompressImageOptionsScreen(
                                 selectedImages = selectedImages,
                                 onUIEvent = viewModel::onUIEvent,
                                 modifier = Modifier.fillMaxSize(),
@@ -128,7 +130,12 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                         }
 
                         composable(NavigationRoutes.COMPRESS_VIDEO.name) {
-
+                            CompressVideoOptionsScreen(
+                                selectedVideos = selectedVideos,
+                                isVideoProcessing = isVideoProcessing,
+                                modifier = Modifier.fillMaxSize(),
+                                onUIEvent = viewModel::onUIEvent
+                            )
                         }
 
                     }

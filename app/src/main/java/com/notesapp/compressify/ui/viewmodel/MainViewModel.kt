@@ -67,7 +67,18 @@ class MainViewModel @Inject constructor(
         }
 
     }
-
+    fun onVideoSelected(uris: List<Uri>) {
+        onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_VIDEO))
+        viewModelScope.launch(Dispatchers.IO) {
+            _selectedVideosProcessing.value = true
+            _selectedVideos.value = uris.map {
+                async {
+                    VideoModel(uri = it)
+                }
+            }.awaitAll()
+            _selectedVideosProcessing.value = false
+        }
+    }
     private fun onImageAdded(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
             _selectedImagesProcessing.value = true
@@ -89,11 +100,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onVideoSelected(uris: List<Uri>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            compressAndSaveVideosUseCase.launch(CompressAndSaveVideoUseCase.Params(uris))
-        }
-    }
+
 
 
     private fun onImageCompressionOptionsConfirm(
@@ -117,6 +124,19 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private fun onVideoCompressionOptionsConfirm(
+    ) {
+        viewModelScope.launch {
+            compressAndSaveVideosUseCase.launch(
+                CompressAndSaveVideoUseCase.Params(
+                    uris = selectedVideos.value.map {
+                        it.uri
+                    }
+                )
+            )
+            sendEvent(Event.CompressionCompleted)
+        }
+    }
 
     fun onUIEvent(event: UIEvent) {
         when (event) {
@@ -126,7 +146,7 @@ class MainViewModel @Inject constructor(
                 }
             }
 
-            is UIEvent.Images.CompressionOptionsConfirmed -> {
+            is UIEvent.Images.ImageCompressionOptionsConfirmed -> {
                 onImageCompressionOptionsConfirm(
                     event.resolution,
                     event.quality,
@@ -141,6 +161,16 @@ class MainViewModel @Inject constructor(
             is UIEvent.Images.OnImagesAdded -> {
                 onImageAdded(event.uris)
             }
+
+            is UIEvent.Videos.OnVideosAdded -> {
+                onVideoSelected(event.uris)
+            }
+            is UIEvent.Videos.RemoveVideoClicked -> {
+                _selectedVideos.value = _selectedVideos.value.filter {
+                    it.uri.path != event.path
+                }
+            }
+            is UIEvent.Videos.VideoCompressionOptionsConfirmed -> TODO()
         }
     }
 

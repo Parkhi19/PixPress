@@ -1,11 +1,8 @@
 package com.notesapp.compressify.ui.components.image
 
-import android.util.Log
-import android.widget.Space
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -50,26 +46,25 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
+import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
 import com.notesapp.compressify.ui.components.home.common.PrimaryButton
 import com.notesapp.compressify.ui.components.home.common.PrimaryImageButton
 import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
-import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
-fun CompressOptionsScreen(
+fun CompressImageOptionsScreen(
     modifier: Modifier = Modifier,
     selectedImages: List<ImageModel>,
     isImageProcessing: Boolean,
     onUIEvent: (UIEvent) -> Unit
 ) {
-    var showDialog by remember {
+    var showOptionsBottomSheet by remember {
         mutableStateOf(false)
     }
 
@@ -83,60 +78,16 @@ fun CompressOptionsScreen(
         }
     }
     Column(modifier = modifier) {
-        ElevatedCard(
+        CompressOptionsHeader(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.background
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 2.dp,
-                pressedElevation = 2.dp
-            )
+            numberOfFiles = selectedImages.size,
+            filesSize = selectedImages.sumOf { it.size }
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp), verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    val totalSelectedImages = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${selectedImages.size} ")
-                        }
-                        append("Selected ")
-                    }
-
-                    Text(
-                        text = totalSelectedImages,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    val totalSelectedImagesSize =
-                        selectedImages.sumOf { it.size }.getFormattedSize()
-
-                    Text(
-                        text = totalSelectedImagesSize,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp)
-                    )
-
-                }
-                PrimaryImageButton(
-                    icon = R.drawable.ic_upload,
-                    onClick = {
-                        selectedPhotoLauncher.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
-                        )
-                    },
-                    buttonText = "Add More"
+            selectedPhotoLauncher.launch(
+                PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly
                 )
-            }
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
@@ -153,42 +104,30 @@ fun CompressOptionsScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         if (selectedImages.isNotEmpty()) {
-            Row(
+            CompressOptionsFooter(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_resolution),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clickable {
-                            showDialog = true
-                        }
-                )
-                Spacer(modifier = Modifier.width(24.dp))
-                PrimaryButton(
-                    onClick = { /*TODO*/ },
-                    buttonText = "Continue",
-                    modifier = Modifier.weight(1f)
-                )
-            }
+                onOptionsClick = {
+                    showOptionsBottomSheet = true
+                },
+                onContinueClick = {
+
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-        if (showDialog) {
+        if (showOptionsBottomSheet) {
             OpenCompressDialog(
                 modifier = Modifier.fillMaxWidth(),
                 onDismiss = {
-                    showDialog = false
+                    showOptionsBottomSheet = false
                 },
                 onConfirm = { resolution, quality, keepOriginal ->
-                    showDialog = false
+                    showOptionsBottomSheet = false
                     onUIEvent(
-                        UIEvent.Images.CompressionOptionsConfirmed(
+                        UIEvent.Images.ImageCompressionOptionsConfirmed(
                             resolution,
                             quality,
                             keepOriginal

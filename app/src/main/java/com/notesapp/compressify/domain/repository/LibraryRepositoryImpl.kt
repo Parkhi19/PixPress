@@ -8,10 +8,11 @@ import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.mongodb.ext.insert
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class LibraryRepositoryImpl : LibraryRepository {
+class LibraryRepositoryImpl @Inject constructor() : LibraryRepository {
 
-    val realm: Realm by lazy {
+    private val realm: Realm by lazy {
         val config = RealmConfiguration.create(schema = setOf(LibraryEntity::class))
         Realm.open(config)
     }

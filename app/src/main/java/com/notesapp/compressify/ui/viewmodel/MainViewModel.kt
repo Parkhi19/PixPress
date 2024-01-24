@@ -121,6 +121,7 @@ class MainViewModel @Inject constructor(
                 )
             )
             sendEvent(Event.CompressionCompleted)
+
         }
     }
 

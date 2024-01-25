@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
+import com.notesapp.compressify.util.precised
 
 @Composable
 fun CustomCircularProgress(
@@ -33,7 +34,7 @@ fun CustomCircularProgress(
         )
         if (showText) {
             Text(
-                text = "${progress}%",
+                text = "${progress.precised(1)}%",
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 color = primaryColor
             )

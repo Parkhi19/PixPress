@@ -51,15 +51,15 @@ fun Long.getFormattedSize(): String {
 
     return when {
         gb >= 1 -> {
-            String.format("%.1f GB", gb)
+            "${gb.precised(1)} GB"
         }
 
         mb >= 1 -> {
-            String.format("%.1f MB", mb)
+            "${mb.precised(1)} MB"
         }
 
         else -> {
-            String.format("%.1f KB", kb)
+            "${kb.precised(1)} KB"
         }
     }
 }
@@ -222,3 +222,10 @@ fun Context.getOtherFilesSize(): Long {
     return FileUtil.occupiedStorageSize - getAllAudioFilesSize() - getAllVideoFilesSize() - getAllImageFilesSize() - getAllDocumentSize()
 }
 
+fun Float.precised(precision : Int): Float {
+    return String.format("%.${precision}f", this).toFloat()
+}
+
+fun Double.precised(precision : Int): Double {
+    return String.format("%.${precision}f", this).toDouble()
+}

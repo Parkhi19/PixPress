@@ -148,6 +148,7 @@ fun OpenCompressDialog(
     onConfirm: (Float, Float, Boolean) -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = { onDismiss(false) }) {
+        val textColor = MaterialTheme.colorScheme.onBackground
         var resolution by remember {
             mutableFloatStateOf(0.9f)
         }
@@ -181,7 +182,8 @@ fun OpenCompressDialog(
                         text = "Compress Options",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold
-                        )
+                        ),
+                        color = textColor
                     )
                 }
                 Spacer(
@@ -205,11 +207,13 @@ fun OpenCompressDialog(
                             Text(
                                 text = "Select Resolution",
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier
+                                modifier = Modifier,
+                                color = textColor
                             )
                             Text(
                                 text = "${(resolution * 100).toInt()} %",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
+                                color = textColor
                             )
                         }
                         Slider(
@@ -236,11 +240,13 @@ fun OpenCompressDialog(
                             Text(
                                 text = "Select Quality",
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 8.dp)
+                                modifier = Modifier.padding(start = 8.dp),
+                                color = textColor
                             )
                             Text(
                                 text = "${(quality * 100).toInt()} %",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
+                                color = textColor
                             )
                         }
                         Slider(
@@ -265,7 +271,8 @@ fun OpenCompressDialog(
                     Text(
                         text = "Keep Original",
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
+                        color = textColor
                     )
                 }
                 PrimaryButton(

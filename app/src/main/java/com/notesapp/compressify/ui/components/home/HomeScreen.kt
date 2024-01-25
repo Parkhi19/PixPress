@@ -52,7 +52,7 @@ fun HomeScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             CustomCircularProgress(
-                progress = 64.4f,
+                progress = FileUtil.occupiedStoragePercentage,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .size(96.dp)
@@ -114,7 +114,7 @@ fun HomeScreen(
                             onCompressImageClick()
                         },
                     imageVector = R.drawable.ic_compress_image,
-                    compressOption = "Compress Images"
+                    compressOption = "Compress\nImages"
                 )
             }
             item {
@@ -125,7 +125,7 @@ fun HomeScreen(
                             onCompressVideoClick()
                         },
                     imageVector = R.drawable.ic_compress_video,
-                    compressOption = "Compress Videos"
+                    compressOption = "Compress\nVideos"
                 )
             }
         }

@@ -4,11 +4,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notesapp.compressify.CompressApplication
+import com.notesapp.compressify.data.repository.LibraryRepository
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.domain.model.VideoModel
+import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
 import com.notesapp.compressify.domain.useCase.BaseUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
@@ -29,7 +32,9 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val compressAndSaveImagesUseCase: CompressAndSaveImagesUseCase,
     private val compressAndSaveVideosUseCase: CompressAndSaveVideoUseCase,
-    private val getCategoryStorageUseCase: GetCategoryStorageUseCase
+    private val getCategoryStorageUseCase: GetCategoryStorageUseCase,
+    private val addLibraryItemUseCase: AddLibraryItemUseCase,
+    private val libraryRepository: LibraryRepository
 ) : ViewModel() {
 
     private val _categoryStorage = MutableStateFlow<List<CategoryModel>>(emptyList())
@@ -109,19 +114,31 @@ class MainViewModel @Inject constructor(
         keepOriginal: Boolean
     ) {
         viewModelScope.launch {
-            compressAndSaveImagesUseCase.launch(
+            val originalUris = selectedImages.value.map {
+            it.uri
+        }
+            val compressedFiles = compressAndSaveImagesUseCase.launch(
                 CompressAndSaveImagesUseCase.Params(
                     context = CompressApplication.appContext,
-                    uris = selectedImages.value.map {
-                        it.uri
-                    },
+                    uris = originalUris,
                     resolution = resolution,
                     quality = quality,
                     keepOriginal = keepOriginal
                 )
             )
             sendEvent(Event.CompressionCompleted)
+            val originalToCompressedMap = originalUris.zip(compressedFiles)
 
+            addLibraryItemUseCase.launch(
+                AddLibraryItemUseCase.Parameters(
+                    libraryModels = originalToCompressedMap.map { (originalUri, compressedUri) ->
+                        LibraryModel(
+                            originalURI = originalUri,
+                            compressedURI = compressedUri
+                        )
+                    }
+                )
+            )
         }
     }
 

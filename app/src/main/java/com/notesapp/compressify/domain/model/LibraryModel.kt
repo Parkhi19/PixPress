@@ -7,7 +7,8 @@ data class LibraryModel(
     val id : String? = null,
     val originalURI : Uri? = null,
     val compressedURI : Uri? = null,
-    val timeStamp : Long = System.currentTimeMillis()
+    val timeStamp : Long = System.currentTimeMillis(),
+    val category : MediaCategory = MediaCategory.IMAGE
 ) {
     constructor(
         libraryEntity: LibraryEntity
@@ -15,6 +16,7 @@ data class LibraryModel(
         id = libraryEntity.id,
         libraryEntity.originalURI?.let { Uri.parse(it) },
         libraryEntity.compressedURI?.let { Uri.parse(it) },
-        libraryEntity.timeStamp
+        libraryEntity.timeStamp,
+        MediaCategory.valueOf(libraryEntity.category)
     )
 }

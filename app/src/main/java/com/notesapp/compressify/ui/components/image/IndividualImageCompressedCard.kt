@@ -32,11 +32,16 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.ui.components.home.common.CompressionOptionsSlider
 import com.notesapp.compressify.ui.theme.primaryTintedColor
+import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.createImageThumbnail
 import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
-fun IndividualImageCompressedCard(modifier: Modifier = Modifier, image: ImageModel) {
+fun IndividualImageCompressedCard(
+    modifier: Modifier = Modifier,
+    image: ImageModel,
+    onUIEvent: (UIEvent) -> Unit
+) {
     ElevatedCard(
         modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
@@ -77,7 +82,9 @@ fun IndividualImageCompressedCard(modifier: Modifier = Modifier, image: ImageMod
                         color = Color.White,
                         overflow = TextOverflow.Ellipsis
                     )
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+                        onUIEvent(UIEvent.Images.RemoveImageClicked(image.uri.path.toString()))
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "",

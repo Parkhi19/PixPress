@@ -74,8 +74,8 @@ fun CompressImageOptionsScreen(
                 ImagePreviewCard(
                     image = selectedImages[it],
                     modifier = Modifier.padding(8.dp),
-                    onDeleteClick = {
-                        onUIEvent(UIEvent.Images.RemoveImageClicked(it))
+                    onDeleteClick = { path ->
+                        onUIEvent(UIEvent.Images.RemoveImageClicked(path))
                     }
                 )
             }

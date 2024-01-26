@@ -63,7 +63,8 @@ fun CompressIndividualImageOptionsScreen(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                             .fillParentMaxWidth(0.9f),
-                        image = image
+                        image = image,
+                        onUIEvent = onUIEvent
                     )
                 }
             }

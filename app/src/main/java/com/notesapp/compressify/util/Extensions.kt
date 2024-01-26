@@ -15,12 +15,16 @@ import com.notesapp.compressify.domain.model.MediaCategory
 import java.io.File
 
 
-fun Uri.createImageThumbnail(): Bitmap {
+fun Uri.createImageThumbnail(reduceFactor: Int = 20): Bitmap {
     val thumbnail =
         MediaStore.Images.Media.getBitmap(CompressApplication.contentResolver, this).run {
-            Bitmap.createScaledBitmap(this, width / 20, height / 20, false)
+            Bitmap.createScaledBitmap(this, width / reduceFactor, height / reduceFactor, false)
         }
     return thumbnail
+}
+
+fun Uri.getBitmap(): Bitmap {
+    return MediaStore.Images.Media.getBitmap(CompressApplication.contentResolver, this)
 }
 
 fun Uri.createVideoThumbnail(): Bitmap {

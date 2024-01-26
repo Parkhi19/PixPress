@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.domain.model.ImageModel
-import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
 import com.notesapp.compressify.ui.components.home.common.PrimaryButton
@@ -50,25 +50,17 @@ import com.notesapp.compressify.util.UIEvent
 import kotlinx.coroutines.launch
 
 @Composable
-fun CompressImageOptionsScreen(
+fun CompressIndividualImageOptionsScreen(
     modifier: Modifier = Modifier,
     selectedImages: List<ImageModel>,
-    isImageProcessing: Boolean,
     onUIEvent: (UIEvent) -> Unit
 ) {
-    var showOptionsBottomSheet by remember {
-        mutableStateOf(false)
-    }
 
     val selectedPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { onUIEvent(UIEvent.Images.OnImagesAdded(it)) }
     )
-    if (isImageProcessing) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(modifier = Modifier.size(48.dp), color = primaryColor)
-        }
-    }
+
     Column(modifier = modifier) {
         CompressOptionsHeader(
             modifier = Modifier.fillMaxWidth(),
@@ -82,53 +74,37 @@ fun CompressImageOptionsScreen(
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
-            items(selectedImages.size) {
-                ImagePreviewCard(
-                    image = selectedImages[it],
-                    modifier = Modifier.padding(8.dp),
-                    onDeleteClick = {
-                        onUIEvent(UIEvent.Images.RemoveImageClicked(it))
-                    }
-                )
+        LazyRow(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            for (image in selectedImages) {
+                item {
+                    IndividualImageCompressedCard(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .fillParentMaxWidth(0.9f),
+                        image = image
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         if (selectedImages.isNotEmpty()) {
-            CompressOptionsFooter(
+            PrimaryButton(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                onOptionsClick = {
-                    showOptionsBottomSheet = true
-                },
-                onContinueClick = {
-                    onUIEvent(UIEvent.Navigate(NavigationRoutes.INDIVIDUAL_IMAGE_PREVIEW))
-                }
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(),
+                onClick = { /*TODO*/ },
+                buttonText = "Start Compression"
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-        if (showOptionsBottomSheet) {
-            ImageCompressionOptionsDialog(
-                modifier = Modifier.fillMaxWidth(),
-                onDismiss = {
-                    showOptionsBottomSheet = false
-                },
-                onConfirm = { resolution, quality, keepOriginal ->
-                    onUIEvent(
-                        UIEvent.Images.ImageCompressionOptionsConfirmed(
-                            resolution,
-                            quality,
-                            keepOriginal
-                        )
-                    )
-                }
-            )
-        }
-
     }
 }
-
 

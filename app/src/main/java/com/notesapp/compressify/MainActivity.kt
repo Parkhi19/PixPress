@@ -44,6 +44,7 @@ import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import android.provider.MediaStore
+import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
 import com.notesapp.compressify.util.getAbsoluteImagePath
 
 
@@ -152,6 +153,14 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             CompressVideoOptionsScreen(
                                 selectedVideos = selectedVideos,
                                 isVideoProcessing = isVideoProcessing,
+                                modifier = Modifier.fillMaxSize(),
+                                onUIEvent = viewModel::onUIEvent
+                            )
+                        }
+
+                        composable(NavigationRoutes.INDIVIDUAL_IMAGE_PREVIEW.name) {
+                            CompressIndividualImageOptionsScreen(
+                                selectedImages = selectedImages,
                                 modifier = Modifier.fillMaxSize(),
                                 onUIEvent = viewModel::onUIEvent
                             )

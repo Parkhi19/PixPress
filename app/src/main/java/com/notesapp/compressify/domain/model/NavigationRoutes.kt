@@ -4,4 +4,5 @@ enum class NavigationRoutes {
     HOME,
     COMPRESS_IMAGE,
     COMPRESS_VIDEO,
+    INDIVIDUAL_IMAGE_PREVIEW
 }

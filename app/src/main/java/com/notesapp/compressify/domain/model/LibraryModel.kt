@@ -4,7 +4,7 @@ import android.net.Uri
 import com.notesapp.compressify.data.entities.LibraryEntity
 
 data class LibraryModel(
-    val id : String? = null,
+    var id : String? = null,
     val originalURI : Uri? = null,
     val compressedURI : Uri? = null,
     val timeStamp : Long = System.currentTimeMillis(),

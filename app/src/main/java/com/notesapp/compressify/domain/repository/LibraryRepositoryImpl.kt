@@ -5,9 +5,9 @@ import com.notesapp.compressify.data.repository.LibraryRepository
 import com.notesapp.compressify.domain.model.LibraryModel
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.mongodb.ext.insert
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 import javax.inject.Inject
 
 class LibraryRepositoryImpl @Inject constructor() : LibraryRepository {
@@ -26,6 +26,7 @@ class LibraryRepositoryImpl @Inject constructor() : LibraryRepository {
     override suspend fun addLibraryItems(libraryModels: List<LibraryModel>) {
         realm.write {
             libraryModels.forEach { libraryModel ->
+                if(libraryModel.id == null) libraryModel.id = UUID.randomUUID().toString()
                 copyToRealm(LibraryEntity(libraryModel))
             }
         }

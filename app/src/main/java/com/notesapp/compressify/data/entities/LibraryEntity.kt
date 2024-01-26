@@ -9,7 +9,7 @@ import java.util.UUID
 
 class LibraryEntity(
     @PrimaryKey
-    val id: String? = null,
+    var id: String? = null,
     var originalURI: String? = null,
     var compressedURI: String? = null,
     var timeStamp: Long = System.currentTimeMillis(),

@@ -3,11 +3,16 @@ package com.notesapp.compressify.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import androidx.annotation.RequiresApi
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import com.notesapp.compressify.CompressApplication
+import com.notesapp.compressify.domain.model.MediaCategory
+import java.io.File
 
 
 fun Uri.createImageThumbnail(): Bitmap {
@@ -22,26 +27,18 @@ fun Uri.createVideoThumbnail(): Bitmap {
     return try {
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(CompressApplication.appContext, this)
-        mediaMetadataRetriever.frameAtTime?: Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
-    } catch (e:Exception) {
+        mediaMetadataRetriever.frameAtTime ?: Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
+    } catch (e: Exception) {
         Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
     }
 }
 
 fun Uri.getFileName(): String {
-    val returnCursor = CompressApplication.contentResolver.query(this, null, null, null, null)!!
-    val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-    returnCursor.moveToFirst()
-    val name = returnCursor.getString(nameIndex)
-    returnCursor.close()
-    return name ?: ""
+    return toFile().name
 }
 
 fun Uri.getFileSize(): Long {
-    val fileDescriptor = CompressApplication.contentResolver.openAssetFileDescriptor(this, "r")
-    val fileSize = fileDescriptor?.length ?: 0
-    fileDescriptor?.close()
-    return fileSize
+  return toFile().length()
 }
 
 fun Long.getFormattedSize(): String {
@@ -83,7 +80,7 @@ fun Context.getAllAudioFilesSize(): Long {
         null,
         null
     )
-    internalQuery?.use { cursor->
+    internalQuery?.use { cursor ->
         val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
         while (cursor.moveToNext()) {
 
@@ -222,10 +219,86 @@ fun Context.getOtherFilesSize(): Long {
     return FileUtil.occupiedStorageSize - getAllAudioFilesSize() - getAllVideoFilesSize() - getAllImageFilesSize() - getAllDocumentSize()
 }
 
-fun Float.precised(precision : Int): Float {
+fun Float.precised(precision: Int): Float {
     return String.format("%.${precision}f", this).toFloat()
 }
 
-fun Double.precised(precision : Int): Double {
+fun Double.precised(precision: Int): Double {
     return String.format("%.${precision}f", this).toDouble()
+}
+
+fun Uri.getAbsoluteImagePath(): Uri? {
+    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        getAbsolutePathAboveAPI29(MediaCategory.IMAGE)
+    } else {
+        getAbsolutePathBelowAPI29(MediaCategory.IMAGE)
+    }
+    return path?.let {
+        File(it).toUri()
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun Uri.getAbsolutePathAboveAPI29(
+    category: MediaCategory
+): String? {
+    val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+    val cursor = CompressApplication.contentResolver.query(this, projection, null, null, null)
+    val displayID = cursor?.use {
+        it.moveToFirst()
+        val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+        it.getString(index).substringBeforeLast(".")
+    }
+    return queryData(
+        category,
+        MediaStore.MediaColumns._ID,
+        displayID
+    )
+}
+
+private fun Uri.getAbsolutePathBelowAPI29(category: MediaCategory): String? {
+    val projection = arrayOf(MediaStore.MediaColumns.DOCUMENT_ID)
+    val cursor = CompressApplication.contentResolver.query(this, projection, null, null, null)
+    return if (cursor != null) {
+        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DOCUMENT_ID)
+        cursor.moveToFirst()
+        val documentId = cursor.getString(columnIndex)
+        cursor.close()
+        queryData(
+            category,
+            MediaStore.MediaColumns.DOCUMENT_ID,
+            documentId
+        )
+    } else {
+        null
+    }
+}
+
+private fun queryData(
+    category: MediaCategory,
+    selectionField: String,
+    selectionId: String?
+): String? {
+    val resultProjection = arrayOf(MediaStore.MediaColumns.DATA)
+    val queryUri = when (category) {
+        MediaCategory.IMAGE -> {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+
+        MediaCategory.VIDEO -> {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+    }
+    val resultCursor = CompressApplication.contentResolver.query(
+        queryUri,
+        resultProjection,
+        "$selectionField = $0",
+        arrayOf(selectionId),
+        null
+    )
+    return resultCursor?.use {
+        it.moveToFirst()
+        val path = it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
+        path
+    }
 }

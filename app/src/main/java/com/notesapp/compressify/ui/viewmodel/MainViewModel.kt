@@ -1,6 +1,7 @@
 package com.notesapp.compressify.ui.viewmodel
 
 import android.net.Uri
+import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notesapp.compressify.CompressApplication
@@ -15,6 +16,7 @@ import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
 import com.notesapp.compressify.domain.useCase.BaseUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
+import com.notesapp.compressify.domain.useCase.DeleteOriginalUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
 import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +36,7 @@ class MainViewModel @Inject constructor(
     private val compressAndSaveVideosUseCase: CompressAndSaveVideoUseCase,
     private val getCategoryStorageUseCase: GetCategoryStorageUseCase,
     private val addLibraryItemUseCase: AddLibraryItemUseCase,
-    private val libraryRepository: LibraryRepository
+    private val deleteOriginalUseCase: DeleteOriginalUseCase
 ) : ViewModel() {
 
     private val _categoryStorage = MutableStateFlow<List<CategoryModel>>(emptyList())
@@ -111,7 +113,7 @@ class MainViewModel @Inject constructor(
     private fun onImageCompressionOptionsConfirm(
         resolution: Float,
         quality: Float,
-        keepOriginal: Boolean
+        deleteOriginal: Boolean
     ) {
         viewModelScope.launch {
             val originalUris = selectedImages.value.map {
@@ -123,9 +125,20 @@ class MainViewModel @Inject constructor(
                     uris = originalUris,
                     resolution = resolution,
                     quality = quality,
-                    keepOriginal = keepOriginal
+                    deleteOriginal = deleteOriginal
                 )
             )
+            if(deleteOriginal){
+                viewModelScope.launch {
+                    originalUris.forEach {
+                        deleteOriginalUseCase.launch(
+                            DeleteOriginalUseCase.Parameters(
+                                filePath = it.toFile().absolutePath
+                            )
+                        )
+                    }
+                }
+            }
             sendEvent(Event.CompressionCompleted)
             val originalToCompressedMap = originalUris.zip(compressedFiles)
 

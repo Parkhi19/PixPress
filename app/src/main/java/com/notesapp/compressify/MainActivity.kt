@@ -19,18 +19,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
-import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.home.HomeScreen
+import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
 import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
@@ -38,6 +43,8 @@ import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import android.provider.MediaStore
+import com.notesapp.compressify.util.getAbsoluteImagePath
 
 
 @AndroidEntryPoint
@@ -74,11 +81,23 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
             }
             selectedPhotoLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
-                onResult = { viewModel.onImageSelected(it) }
+                onResult = { uris ->
+                    if (uris.isNotEmpty()) {
+                        viewModel.onImageSelected(
+                            uris = uris.mapNotNull {
+                                it.getAbsoluteImagePath()
+                            }
+                        )
+                    }
+                }
             )
             selectedVideoLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
-                onResult = { viewModel.onVideoSelected(it) }
+                onResult = {
+                    if (it.isNotEmpty()) {
+                        viewModel.onVideoSelected(it)
+                    }
+                }
             )
             CompressifyTheme {
                 val selectedImages by viewModel.selectedImages.collectAsState()

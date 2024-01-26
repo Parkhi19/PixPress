@@ -4,7 +4,6 @@ import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.domain.model.MediaCategory
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-import org.mongodb.kbson.ObjectId
 import java.util.UUID
 
 class LibraryEntity(

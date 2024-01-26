@@ -37,15 +37,14 @@ import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.HomeScreen
 import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
+import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
 import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
+import com.notesapp.compressify.util.getAbsoluteImagePath
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import android.provider.MediaStore
-import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
-import com.notesapp.compressify.util.getAbsoluteImagePath
 
 
 @AndroidEntryPoint

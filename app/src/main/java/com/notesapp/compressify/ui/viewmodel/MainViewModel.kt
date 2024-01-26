@@ -5,7 +5,6 @@ import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notesapp.compressify.CompressApplication
-import com.notesapp.compressify.data.repository.LibraryRepository
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageModel

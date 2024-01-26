@@ -1,7 +1,5 @@
 package com.notesapp.compressify.domain.useCase
 
-import android.net.Uri
-import com.iceteck.silicompressorr.Util.getFilePath
 import java.io.File
 import javax.inject.Inject
 

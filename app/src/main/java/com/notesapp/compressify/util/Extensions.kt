@@ -6,7 +6,6 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import androidx.annotation.RequiresApi
 import androidx.core.net.toFile
 import androidx.core.net.toUri

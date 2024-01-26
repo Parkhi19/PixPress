@@ -3,7 +3,6 @@ package com.notesapp.compressify.domain.useCase
 import com.notesapp.compressify.data.repository.LibraryRepository
 import com.notesapp.compressify.domain.model.LibraryModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 

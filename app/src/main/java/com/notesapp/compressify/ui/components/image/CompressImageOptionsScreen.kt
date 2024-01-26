@@ -28,14 +28,17 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +59,7 @@ import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getFormattedSize
+import kotlinx.coroutines.launch
 
 @Composable
 fun CompressImageOptionsScreen(
@@ -125,7 +129,6 @@ fun CompressImageOptionsScreen(
                     showOptionsBottomSheet = false
                 },
                 onConfirm = { resolution, quality, keepOriginal ->
-                    showOptionsBottomSheet = false
                     onUIEvent(
                         UIEvent.Images.ImageCompressionOptionsConfirmed(
                             resolution,
@@ -133,7 +136,7 @@ fun CompressImageOptionsScreen(
                             keepOriginal
                         )
                     )
-                },
+                }
             )
         }
 
@@ -144,10 +147,12 @@ fun CompressImageOptionsScreen(
 @Composable
 fun OpenCompressDialog(
     modifier: Modifier,
-    onDismiss: (Boolean) -> Unit,
-    onConfirm: (Float, Float, Boolean) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: (Float, Float, Boolean) -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = { onDismiss(false) }) {
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+    ModalBottomSheet(onDismissRequest = { onDismiss() }, sheetState = sheetState) {
         val textColor = MaterialTheme.colorScheme.onBackground
         var resolution by remember {
             mutableFloatStateOf(0.9f)
@@ -269,14 +274,22 @@ fun OpenCompressDialog(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     Text(
-                        text = "Keep Original",
+                        text = "Delete Original",
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(start = 8.dp),
                         color = textColor
                     )
                 }
                 PrimaryButton(
-                    onClick = { onConfirm(resolution, quality, keepOriginal) },
+                    onClick = { onConfirm(resolution, quality, keepOriginal)
+                               coroutineScope.launch {
+                                   sheetState.hide()
+                               }.invokeOnCompletion {
+                                   if (!sheetState.isVisible) {
+                                       onDismiss()
+                                   }
+                               }
+                              },
                     buttonText = "Apply",
                     modifier = Modifier
                         .fillMaxWidth()

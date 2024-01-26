@@ -3,9 +3,7 @@ package com.notesapp.compressify.ui.components.video
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,11 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
@@ -146,7 +140,7 @@ fun OpenCompressDialog(
         var quality by remember {
             mutableFloatStateOf(0.9f)
         }
-        var keepOriginal by remember {
+        var DeleteOriginal by remember {
             mutableStateOf(true)
         }
         Card(
@@ -257,19 +251,19 @@ fun OpenCompressDialog(
                 }
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = keepOriginal,
-                        onCheckedChange = { keepOriginal = it },
+                        checked = DeleteOriginal,
+                        onCheckedChange = { DeleteOriginal = it },
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     Text(
-                        text = "Keep Original",
+                        text = "Delete Original",
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(start = 8.dp),
                         color = textColor
                     )
                 }
                 PrimaryButton(
-                    onClick = { onConfirm(resolution, quality, keepOriginal) },
+                    onClick = { onConfirm(resolution, quality, DeleteOriginal) },
                     buttonText = "Apply",
                     modifier = Modifier
                         .fillMaxWidth()

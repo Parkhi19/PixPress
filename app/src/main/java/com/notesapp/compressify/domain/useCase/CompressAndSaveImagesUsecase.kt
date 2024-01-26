@@ -4,13 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.core.net.toFile
 import androidx.core.net.toUri
-import com.notesapp.compressify.domain.model.CompressionRatio
 import com.notesapp.compressify.util.FileUtil
-import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
-import java.io.OutputStream
 import javax.inject.Inject
 
 class CompressAndSaveImagesUseCase @Inject constructor(): BaseUseCase<CompressAndSaveImagesUseCase.Params, List<Uri?>>() {
@@ -19,7 +15,7 @@ class CompressAndSaveImagesUseCase @Inject constructor(): BaseUseCase<CompressAn
         val uris: List<Uri>,
         val resolution : Float,
         val quality : Float,
-        val keepOriginal : Boolean
+        val deleteOriginal : Boolean
     ) : Parameters()
 
     override suspend fun launch(parameters: Params) : List<Uri?> {

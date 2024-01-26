@@ -140,8 +140,8 @@ fun OpenCompressDialog(
         var quality by remember {
             mutableFloatStateOf(0.9f)
         }
-        var DeleteOriginal by remember {
-            mutableStateOf(true)
+        var deleteOriginal by remember {
+            mutableStateOf(false)
         }
         Card(
             shape = RoundedCornerShape(
@@ -251,8 +251,8 @@ fun OpenCompressDialog(
                 }
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = DeleteOriginal,
-                        onCheckedChange = { DeleteOriginal = it },
+                        checked = deleteOriginal,
+                        onCheckedChange = { deleteOriginal = it },
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     Text(
@@ -263,7 +263,7 @@ fun OpenCompressDialog(
                     )
                 }
                 PrimaryButton(
-                    onClick = { onConfirm(resolution, quality, DeleteOriginal) },
+                    onClick = { onConfirm(resolution, quality, deleteOriginal) },
                     buttonText = "Apply",
                     modifier = Modifier
                         .fillMaxWidth()

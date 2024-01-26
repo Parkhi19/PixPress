@@ -77,7 +77,7 @@ fun IndividualImageCompressedCard(modifier: Modifier = Modifier, image: ImageMod
                         }
                 ) {
                     Text(
-                        text = "File Name",
+                        text = image.name,
                         modifier = Modifier
                             .fillMaxWidth(0.8f)
                             .padding(start = 8.dp, end = 4.dp),
@@ -140,7 +140,7 @@ fun IndividualImageCompressedCard(modifier: Modifier = Modifier, image: ImageMod
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(

@@ -47,6 +47,7 @@ import com.notesapp.compressify.ui.components.home.common.PrimaryButton
 import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.UIEvent
+import com.notesapp.compressify.util.getAbsoluteImagePath
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,7 +59,13 @@ fun CompressIndividualImageOptionsScreen(
 
     val selectedPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
-        onResult = { onUIEvent(UIEvent.Images.OnImagesAdded(it)) }
+        onResult = { uris ->
+            onUIEvent(UIEvent.Images.OnImagesAdded(
+                uris.mapNotNull {
+                    it.getAbsoluteImagePath()
+                }
+            ))
+        }
     )
 
     Column(modifier = modifier) {

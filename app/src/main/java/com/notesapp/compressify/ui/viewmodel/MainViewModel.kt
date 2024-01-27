@@ -18,6 +18,8 @@ import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.domain.useCase.DeleteOriginalUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
 import com.notesapp.compressify.util.UIEvent
+import com.notesapp.compressify.util.getAbsoluteImagePath
+import com.notesapp.compressify.util.getAbsoluteVideoPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -64,7 +66,9 @@ class MainViewModel @Inject constructor(
         onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_IMAGE))
         viewModelScope.launch(Dispatchers.IO) {
             _selectedImagesProcessing.value = true
-            _selectedImages.value = uris.map {
+            _selectedImages.value = uris.mapNotNull {
+                it.getAbsoluteImagePath()
+            }.map {
                 async {
                     ImageModel(uri = it)
                 }
@@ -73,11 +77,14 @@ class MainViewModel @Inject constructor(
         }
 
     }
+
     fun onVideoSelected(uris: List<Uri>) {
         onUIEvent(UIEvent.Navigate(NavigationRoutes.COMPRESS_VIDEO))
         viewModelScope.launch(Dispatchers.IO) {
             _selectedVideosProcessing.value = true
-            _selectedVideos.value = uris.map {
+            _selectedVideos.value = uris.mapNotNull {
+                it.getAbsoluteVideoPath()
+            }.map {
                 async {
                     VideoModel(uri = it)
                 }
@@ -85,11 +92,14 @@ class MainViewModel @Inject constructor(
             _selectedVideosProcessing.value = false
         }
     }
+
     private fun onImageAdded(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
             _selectedImagesProcessing.value = true
-            _selectedImages.value = _selectedImages.value + uris.filter {
-                uri -> _selectedImages.value.none { it.uri.path == uri.path }
+            _selectedImages.value = _selectedImages.value + uris.mapNotNull {
+                it.getAbsoluteImagePath()
+            }.filter { uri ->
+                _selectedImages.value.none { it.uri.path == uri.path }
             }.map {
                 async {
                     ImageModel(uri = it)
@@ -107,8 +117,6 @@ class MainViewModel @Inject constructor(
     }
 
 
-
-
     private fun onImageCompressionOptionsConfirm(
         resolution: Float,
         quality: Float,
@@ -116,8 +124,8 @@ class MainViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val originalUris = selectedImages.value.map {
-            it.uri
-        }
+                it.uri
+            }
             val compressedFiles = compressAndSaveImagesUseCase.launch(
                 CompressAndSaveImagesUseCase.Params(
                     context = CompressApplication.appContext,
@@ -127,7 +135,7 @@ class MainViewModel @Inject constructor(
                     deleteOriginal = deleteOriginal
                 )
             )
-            if(deleteOriginal){
+            if (deleteOriginal) {
                 viewModelScope.launch {
                     originalUris.forEach {
                         deleteOriginalUseCase.launch(
@@ -195,11 +203,13 @@ class MainViewModel @Inject constructor(
             is UIEvent.Videos.OnVideosAdded -> {
                 onVideoSelected(event.uris)
             }
+
             is UIEvent.Videos.RemoveVideoClicked -> {
                 _selectedVideos.value = _selectedVideos.value.filter {
                     it.uri.path != event.path
                 }
             }
+
             is UIEvent.Videos.VideoCompressionOptionsConfirmed -> TODO()
         }
     }

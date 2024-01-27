@@ -43,6 +43,7 @@ import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getAbsoluteImagePath
+import com.notesapp.compressify.util.getAbsoluteVideoPath
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 
@@ -84,19 +85,20 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 onResult = { uris ->
                     if (uris.isNotEmpty()) {
                         viewModel.onImageSelected(
-                            uris = uris.mapNotNull {
-                                it.getAbsoluteImagePath()
-                            }
+                            uris = uris
                         )
                     }
                 }
             )
             selectedVideoLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
-                onResult = {
-                    if (it.isNotEmpty()) {
-                        viewModel.onVideoSelected(it)
+                onResult = {uris->
+                    if(uris.isNotEmpty()){
+                        viewModel.onVideoSelected(
+                           uris = uris
+                        )
                     }
+
                 }
             )
             CompressifyTheme {

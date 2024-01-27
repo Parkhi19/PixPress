@@ -44,11 +44,7 @@ fun CompressImageOptionsScreen(
     val selectedPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uris ->
-            onUIEvent(UIEvent.Images.OnImagesAdded(
-                uris.mapNotNull {
-                    it.getAbsoluteImagePath()
-                }
-            ))
+            onUIEvent(UIEvent.Images.OnImagesAdded(uris))
         }
     )
     if (isImageProcessing) {

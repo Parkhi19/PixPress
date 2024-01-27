@@ -241,6 +241,17 @@ fun Uri.getAbsoluteImagePath(): Uri? {
     }
 }
 
+fun Uri.getAbsoluteVideoPath(): Uri? {
+    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        getAbsolutePathAboveAPI29(MediaCategory.VIDEO)
+    } else {
+        getAbsolutePathBelowAPI29(MediaCategory.VIDEO)
+    }
+    return path?.let {
+        File(it).toUri()
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.Q)
 private fun Uri.getAbsolutePathAboveAPI29(
     category: MediaCategory
@@ -305,3 +316,4 @@ private fun queryData(
         path
     }
 }
+

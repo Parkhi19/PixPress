@@ -1,5 +1,6 @@
 package com.notesapp.compressify.ui.components.image
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,26 +35,24 @@ import com.notesapp.compressify.ui.theme.primaryTintedColor
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ImageCompressionOptionsDialog(
     modifier: Modifier,
     onDismiss: () -> Unit,
+    initialResolution : Float,
+    initialQuality : Float,
+    initialDeleteOriginal : Boolean,
     onConfirm: (Float, Float, Boolean) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(onDismissRequest = { onDismiss() }, sheetState = sheetState) {
         val textColor = MaterialTheme.colorScheme.onBackground
-        var resolution by remember {
-            mutableFloatStateOf(0.9f)
-        }
-        var quality by remember {
-            mutableFloatStateOf(0.9f)
-        }
-        var deleteOriginal by remember {
-            mutableStateOf(false)
-        }
+        var resolution by mutableFloatStateOf(initialResolution)
+        var quality by mutableFloatStateOf(initialQuality)
+        var deleteOriginal by mutableStateOf(initialDeleteOriginal)
         Card(
             shape = RoundedCornerShape(
                 size = 8.dp

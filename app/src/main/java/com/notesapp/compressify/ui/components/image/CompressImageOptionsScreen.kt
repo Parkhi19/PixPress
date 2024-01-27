@@ -17,6 +17,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +37,16 @@ fun CompressImageOptionsScreen(
     compressImagesUIState: CompressImagesUIState,
     onUIEvent: (UIEvent) -> Unit
 ) {
+    var resolution by remember {
+        mutableFloatStateOf(0.9f)
+    }
+    var quality by remember {
+        mutableFloatStateOf(0.9f)
+    }
+    var deleteOriginal by remember {
+        mutableStateOf(false)
+    }
+
     val (selectedImages, isImageProcessing) = compressImagesUIState
     var showOptionsBottomSheet by remember {
         mutableStateOf(false)
@@ -99,14 +110,13 @@ fun CompressImageOptionsScreen(
                 onDismiss = {
                     showOptionsBottomSheet = false
                 },
-                onConfirm = { resolution, quality, keepOriginal ->
-                    onUIEvent(
-                        UIEvent.Images.ImageCompressionOptionsApplied(
-                            resolution,
-                            quality,
-                            keepOriginal
-                        )
-                    )
+                initialResolution = resolution,
+                initialQuality = quality,
+                initialDeleteOriginal = deleteOriginal,
+                onConfirm = { appliedResolution, appliedQuality, appliedDeleteOriginal ->
+                    resolution = appliedResolution
+                    quality = appliedQuality
+                    deleteOriginal = appliedDeleteOriginal
                 }
             )
         }

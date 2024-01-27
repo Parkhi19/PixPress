@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,15 +29,14 @@ import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
 import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.util.UIEvent
-import com.notesapp.compressify.util.getAbsoluteImagePath
 
 @Composable
 fun CompressImageOptionsScreen(
     modifier: Modifier = Modifier,
-    selectedImages: List<ImageModel>,
-    isImageProcessing: Boolean,
+    compressImagesUIState: CompressImagesUIState,
     onUIEvent: (UIEvent) -> Unit
 ) {
+    val (selectedImages, isImageProcessing) = compressImagesUIState
     var showOptionsBottomSheet by remember {
         mutableStateOf(false)
     }
@@ -101,7 +101,7 @@ fun CompressImageOptionsScreen(
                 },
                 onConfirm = { resolution, quality, keepOriginal ->
                     onUIEvent(
-                        UIEvent.Images.ImageCompressionOptionsConfirmed(
+                        UIEvent.Images.ImageCompressionOptionsApplied(
                             resolution,
                             quality,
                             keepOriginal
@@ -110,8 +110,13 @@ fun CompressImageOptionsScreen(
                 }
             )
         }
-
     }
 }
+
+@Stable
+data class CompressImagesUIState(
+    val selectedImages: List<ImageModel> = emptyList(),
+    val isImageProcessing: Boolean = false
+)
 
 

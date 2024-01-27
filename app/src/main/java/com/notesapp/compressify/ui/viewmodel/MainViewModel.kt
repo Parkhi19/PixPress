@@ -17,6 +17,7 @@ import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.domain.useCase.DeleteOriginalUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
+import com.notesapp.compressify.ui.components.image.CompressImagesUIState
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getAbsoluteImagePath
 import com.notesapp.compressify.util.getAbsoluteVideoPath
@@ -26,8 +27,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -57,6 +61,16 @@ class MainViewModel @Inject constructor(
 
     private val _currentRoute = MutableStateFlow(NavigationRoutes.HOME)
     val currentRoute = _currentRoute.asStateFlow()
+
+    val compressImagesUIState = combine(
+        selectedImages,
+        selectedImagesProcessing
+    ){ images, isProcessing ->
+        CompressImagesUIState(
+            selectedImages = images,
+            isImageProcessing = isProcessing
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, CompressImagesUIState())
 
     private val eventChannel = Channel<Event> { }
     val eventsFlow = eventChannel.receiveAsFlow()
@@ -184,7 +198,7 @@ class MainViewModel @Inject constructor(
                 }
             }
 
-            is UIEvent.Images.ImageCompressionOptionsConfirmed -> {
+            is UIEvent.Images.ImageCompressionOptionsApplied -> {
                 onImageCompressionOptionsConfirm(
                     event.resolution,
                     event.quality,

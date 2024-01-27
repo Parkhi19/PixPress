@@ -109,6 +109,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val selectedVideos by viewModel.selectedVideos.collectAsState()
                 val isVideoProcessing by viewModel.selectedVideosProcessing.collectAsState()
 
+                val compressImagesUIState by viewModel.compressImagesUIState.collectAsState()
+
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -143,10 +145,9 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
                         composable(NavigationRoutes.COMPRESS_IMAGE.name) {
                             CompressImageOptionsScreen(
-                                selectedImages = selectedImages,
+                                compressImagesUIState = compressImagesUIState,
                                 onUIEvent = viewModel::onUIEvent,
-                                modifier = Modifier.fillMaxSize(),
-                                isImageProcessing = isImageProcessing
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
 

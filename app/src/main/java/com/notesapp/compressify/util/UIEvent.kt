@@ -10,7 +10,7 @@ sealed interface UIEvent {
         data class ImageCompressionOptionsApplied(
             val resolution: Float,
             val quality: Float,
-            val keepOriginal: Boolean
+            val deleteOriginal: Boolean
         ) : Images
 
         data class OnImagesAdded(val uris: List<Uri>) : Images

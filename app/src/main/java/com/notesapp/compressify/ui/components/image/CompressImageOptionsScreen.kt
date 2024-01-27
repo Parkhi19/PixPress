@@ -24,11 +24,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
 import com.notesapp.compressify.ui.theme.primaryColor
+import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 
 @Composable
@@ -38,10 +40,10 @@ fun CompressImageOptionsScreen(
     onUIEvent: (UIEvent) -> Unit
 ) {
     var resolution by remember {
-        mutableFloatStateOf(0.9f)
+        mutableFloatStateOf(MainViewModel.INITIAL_RESOLUTION)
     }
     var quality by remember {
-        mutableFloatStateOf(0.9f)
+        mutableFloatStateOf(MainViewModel.INITIAL_QUALITY)
     }
     var deleteOriginal by remember {
         mutableStateOf(false)
@@ -98,6 +100,13 @@ fun CompressImageOptionsScreen(
                     showOptionsBottomSheet = true
                 },
                 onContinueClick = {
+                    onUIEvent(
+                        UIEvent.Images.ImageCompressionOptionsApplied(
+                            resolution = resolution,
+                            quality = quality,
+                            deleteOriginal = deleteOriginal
+                        )
+                    )
                     onUIEvent(UIEvent.Navigate(NavigationRoutes.INDIVIDUAL_IMAGE_PREVIEW))
                 }
             )

@@ -62,6 +62,15 @@ class MainViewModel @Inject constructor(
     private val _currentRoute = MutableStateFlow(NavigationRoutes.HOME)
     val currentRoute = _currentRoute.asStateFlow()
 
+    private val _resolution = MutableStateFlow(INITIAL_RESOLUTION)
+    val resolution = _resolution.asStateFlow()
+
+    private val _quality = MutableStateFlow(INITIAL_QUALITY)
+    val quality = _quality.asStateFlow()
+
+    private val _deleteOriginal = MutableStateFlow(false)
+    val deleteOriginal = _deleteOriginal.asStateFlow()
+
     val compressImagesUIState = combine(
         selectedImages,
         selectedImagesProcessing
@@ -130,6 +139,15 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private fun onContinueOptionClick(
+        resolution: Float,
+        quality: Float,
+        deleteOriginal: Boolean
+    ){
+        _resolution.value = resolution
+        _quality.value = quality
+        _deleteOriginal.value = deleteOriginal
+    }
 
     private fun onImageCompressionOptionsConfirm(
         resolution: Float,
@@ -199,10 +217,10 @@ class MainViewModel @Inject constructor(
             }
 
             is UIEvent.Images.ImageCompressionOptionsApplied -> {
-                onImageCompressionOptionsConfirm(
+                onContinueOptionClick(
                     event.resolution,
                     event.quality,
-                    event.keepOriginal
+                    event.deleteOriginal
                 )
             }
 
@@ -232,5 +250,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             eventChannel.send(event)
         }
+    }
+
+    companion object{
+        const val INITIAL_RESOLUTION = 0.9f
+        const val INITIAL_QUALITY = 0.9f
     }
 }

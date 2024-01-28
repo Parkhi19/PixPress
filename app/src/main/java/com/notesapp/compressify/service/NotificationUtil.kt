@@ -14,9 +14,8 @@ object NotificationUtil  {
     fun createCompletionNotification(context: Context, message: String): Notification {
         createNotificationChannel(context, COMPLETION_NOTIFICATION_ID)
         return NotificationCompat.Builder(context, COMPLETION_NOTIFICATION_ID)
-            .setContentTitle("PixPress")
-            .setContentText(message)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(message)
+            .setSmallIcon(R.drawable.completed)
             .build()
     }
 

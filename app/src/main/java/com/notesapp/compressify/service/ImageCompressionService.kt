@@ -38,7 +38,7 @@ class ImageCompressionService : Service() {
                 .setProgress(imagesToOptions.size, 0, false)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_category_image)
         val notification = notificationBuilder.build()
         startForeground(SERVICE_ID, notification)
 

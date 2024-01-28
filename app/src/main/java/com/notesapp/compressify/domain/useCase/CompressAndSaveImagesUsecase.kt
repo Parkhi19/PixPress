@@ -27,7 +27,7 @@ class CompressAndSaveImagesUseCase @Inject constructor() :
         val imagesToOptions: List<ImageCompressionService.ImageCompressionModel>
     ) : Parameters()
 
-    override suspend fun launch(parameters: Params) : Int{
+    override suspend fun launch(parameters: Params): Int {
         coroutineScope {
             parameters.imagesToOptions.chunked(10).forEach { chunkedImages ->
                 chunkedImages.map { compressionModel ->
@@ -47,13 +47,18 @@ class CompressAndSaveImagesUseCase @Inject constructor() :
                 chunkedImages.map { compressionModel ->
                     async { compressImage(compressionModel) }
                 }.awaitAll()
+                chunkedImages.filter { it.deleteOriginal }.map {
+                    async {
+                        it.uri.toFile().delete()
+                    }
+                }.awaitAll()
                 compressed += chunkedImages.size
                 emit(compressed)
             }
         }
     }
 
-    private fun compressImage(compressionModel: ImageCompressionService.ImageCompressionModel) {
+    private fun compressImage(compressionModel: ImageCompressionService.ImageCompressionModel): Uri {
         val originalExtension = compressionModel.uri.toFile().extension
 
         val bitmap = compressionModel.uri.getBitmap()
@@ -81,7 +86,7 @@ class CompressAndSaveImagesUseCase @Inject constructor() :
         )
         outputStream.flush()
         outputStream.close()
-        resultFile.toUri()
+        return resultFile.toUri()
     }
 
 }

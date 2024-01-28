@@ -2,21 +2,19 @@ package com.notesapp.compressify.ui.viewmodel
 
 import android.net.Uri
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageModel
-import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
 import com.notesapp.compressify.domain.useCase.BaseUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
-import com.notesapp.compressify.domain.useCase.DeleteOriginalUseCase
+import com.notesapp.compressify.domain.useCase.DeleteFilesUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
 import com.notesapp.compressify.service.ImageCompressionService
 import com.notesapp.compressify.ui.components.image.CompressImagesUIState
@@ -43,7 +41,7 @@ class MainViewModel @Inject constructor(
     private val compressAndSaveVideosUseCase: CompressAndSaveVideoUseCase,
     private val getCategoryStorageUseCase: GetCategoryStorageUseCase,
     private val addLibraryItemUseCase: AddLibraryItemUseCase,
-    private val deleteOriginalUseCase: DeleteOriginalUseCase
+    private val deleteFilesUseCase: DeleteFilesUseCase
 ) : ViewModel() {
 
     private val _categoryStorage = MutableStateFlow<List<CategoryModel>>(emptyList())

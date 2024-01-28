@@ -32,6 +32,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.ui.components.home.common.CompressionOptionsSlider
 import com.notesapp.compressify.ui.theme.primaryTintedColor
+import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.createImageThumbnail
 import com.notesapp.compressify.util.getFormattedSize
@@ -40,8 +41,11 @@ import com.notesapp.compressify.util.getFormattedSize
 fun IndividualImageCompressedCard(
     modifier: Modifier = Modifier,
     image: ImageModel,
+    compressionOptions: MainViewModel.ImageCompressionOptions,
+    onCompressionOptionsChanged: (MainViewModel.ImageCompressionOptions) -> Unit,
     onUIEvent: (UIEvent) -> Unit
 ) {
+    val (resolution, quality, deleteOriginal) = compressionOptions
     ElevatedCard(
         modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
@@ -119,10 +123,15 @@ fun IndividualImageCompressedCard(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     label = "Resolution",
-                    labelValue = "90",
-                    value = 90f,
+                    labelValue = image.width.times(resolution).toInt()
+                        .toString() + " x " + image.height.times(resolution).toInt().toString(),
+                    value = resolution,
                     onValueChange = {
-
+                        onCompressionOptionsChanged(
+                            compressionOptions.copy(
+                                resolution = it
+                            )
+                        )
                     }
                 )
 
@@ -131,10 +140,14 @@ fun IndividualImageCompressedCard(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     label = "Quality",
-                    labelValue = "90",
-                    value = 90f,
+                    labelValue = "${(quality * 100).toInt()} %",
+                    value = quality,
                     onValueChange = {
-
+                        onCompressionOptionsChanged(
+                            compressionOptions.copy(
+                                quality = it
+                            )
+                        )
                     }
                 )
                 Row(
@@ -144,8 +157,14 @@ fun IndividualImageCompressedCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = false,
-                        onCheckedChange = { },
+                        checked = deleteOriginal,
+                        onCheckedChange = {
+                            onCompressionOptionsChanged(
+                                compressionOptions.copy(
+                                    deleteOriginal = it
+                                )
+                            )
+                        },
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     Text(

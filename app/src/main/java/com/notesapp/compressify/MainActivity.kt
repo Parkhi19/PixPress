@@ -111,6 +111,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
                 val compressImagesUIState by viewModel.compressImagesUIState.collectAsState()
 
+                val imageCompressionOptions by viewModel.allImageCompressOptions.collectAsState()
+
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -164,6 +166,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             CompressIndividualImageOptionsScreen(
                                 selectedImages = selectedImages,
                                 modifier = Modifier.fillMaxSize(),
+                                compressionOptions = imageCompressionOptions,
                                 onUIEvent = viewModel::onUIEvent
                             )
                         }

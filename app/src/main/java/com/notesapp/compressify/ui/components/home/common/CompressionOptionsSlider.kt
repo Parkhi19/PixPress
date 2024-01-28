@@ -1,5 +1,7 @@
 package com.notesapp.compressify.ui.components.home.common
 
+import androidx.annotation.FloatRange
+import androidx.annotation.IntRange
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +21,7 @@ fun CompressionOptionsSlider(
     modifier: Modifier = Modifier,
     label: String,
     labelValue: String,
-    value: Float,
+    @FloatRange(0.1, 1.0) value: Float,
     onValueChange: (Float) -> Unit
 ) {
     val textColor = MaterialTheme.colorScheme.onBackground

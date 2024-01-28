@@ -62,19 +62,14 @@ class MainViewModel @Inject constructor(
     private val _currentRoute = MutableStateFlow(NavigationRoutes.HOME)
     val currentRoute = _currentRoute.asStateFlow()
 
-    private val _resolution = MutableStateFlow(INITIAL_RESOLUTION)
-    val resolution = _resolution.asStateFlow()
+    private val _allImageCompressOptions = MutableStateFlow(ImageCompressionOptions())
+    val allImageCompressOptions = _allImageCompressOptions.asStateFlow()
 
-    private val _quality = MutableStateFlow(INITIAL_QUALITY)
-    val quality = _quality.asStateFlow()
-
-    private val _deleteOriginal = MutableStateFlow(false)
-    val deleteOriginal = _deleteOriginal.asStateFlow()
 
     val compressImagesUIState = combine(
         selectedImages,
         selectedImagesProcessing
-    ){ images, isProcessing ->
+    ) { images, isProcessing ->
         CompressImagesUIState(
             selectedImages = images,
             isImageProcessing = isProcessing
@@ -143,10 +138,12 @@ class MainViewModel @Inject constructor(
         resolution: Float,
         quality: Float,
         deleteOriginal: Boolean
-    ){
-        _resolution.value = resolution
-        _quality.value = quality
-        _deleteOriginal.value = deleteOriginal
+    ) {
+        _allImageCompressOptions.value = ImageCompressionOptions(
+            resolution = resolution,
+            quality = quality,
+            deleteOriginal = deleteOriginal
+        )
     }
 
     private fun onImageCompressionOptionsConfirm(
@@ -252,8 +249,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    companion object{
+    companion object {
         const val INITIAL_RESOLUTION = 0.9f
         const val INITIAL_QUALITY = 0.9f
     }
+
+    data class ImageCompressionOptions(
+        val resolution: Float = INITIAL_RESOLUTION,
+        val quality: Float = INITIAL_QUALITY,
+        val deleteOriginal: Boolean = false
+    )
 }

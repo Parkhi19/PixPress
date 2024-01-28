@@ -16,20 +16,40 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.io.FileOutputStream
 import javax.inject.Inject
 
 class CompressAndSaveImagesUseCase @Inject constructor() :
-    BaseUseCase<CompressAndSaveImagesUseCase.Params, Unit>() {
+    BaseUseCase<CompressAndSaveImagesUseCase.Params, Int>() {
     data class Params(
         val imagesToOptions: List<ImageCompressionService.ImageCompressionModel>
     ) : Parameters()
 
-    override suspend fun launch(parameters: Params) {
+    override suspend fun launch(parameters: Params) : Int{
         coroutineScope {
-            parameters.imagesToOptions.map { compressionModel ->
-                async { compressImage(compressionModel) }
-            }.awaitAll()
+            parameters.imagesToOptions.chunked(10).forEach { chunkedImages ->
+                chunkedImages.map { compressionModel ->
+                    async { compressImage(compressionModel) }
+                }.awaitAll()
+            }
+        }
+        return parameters.imagesToOptions.size
+    }
+
+    override fun launchWithFlow(parameters: Params): Flow<Int> = flow {
+        val chunkedList = parameters.imagesToOptions.chunked(10)
+        emit(0)
+        coroutineScope {
+            var compressed = 0
+            chunkedList.forEach { chunkedImages ->
+                chunkedImages.map { compressionModel ->
+                    async { compressImage(compressionModel) }
+                }.awaitAll()
+                compressed += chunkedImages.size
+                emit(compressed)
+            }
         }
     }
 
@@ -63,4 +83,5 @@ class CompressAndSaveImagesUseCase @Inject constructor() :
         outputStream.close()
         resultFile.toUri()
     }
+
 }

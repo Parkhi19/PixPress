@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Parcelable
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.asLiveData
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
@@ -27,35 +28,52 @@ class ImageCompressionService : Service() {
 
     private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        createNotificationChannel()
-        val notification = NotificationCompat.Builder(this, IMAGE_COMPRESSION_NOTIFICATION_ID)
-            .setContentTitle("PixPress")
-            .setContentText("Compressing images")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .build()
-        startForeground(SERVICE_ID, notification)
         val imagesToOptions = intent?.getParcelableArrayListExtra(
             IMAGE_TO_OPTIONS
         ) ?: emptyList<ImageCompressionModel>()
+        createNotificationChannel()
+        val notificationBuilder =
+            NotificationCompat.Builder(this, IMAGE_COMPRESSION_NOTIFICATION_ID)
+                .setContentTitle("0 / ${imagesToOptions.size} Images Compressed")
+                .setProgress(imagesToOptions.size, 0, false)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+        val notification = notificationBuilder.build()
+        startForeground(SERVICE_ID, notification)
 
-        CoroutineScope(Dispatchers.IO).launch {
-            compressAndSaveImagesUseCase.launch(
-                CompressAndSaveImagesUseCase.Params(
-                    imagesToOptions = imagesToOptions
-                )
+
+        val totalCompressedImages = compressAndSaveImagesUseCase.launchWithFlow(
+            CompressAndSaveImagesUseCase.Params(
+                imagesToOptions = imagesToOptions
             )
-        }.invokeOnCompletion {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            val completionNotification = NotificationUtil.createCompletionNotification(
-                this,
-                "${imagesToOptions.size} Images compressed"
-            )
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.notify(1, completionNotification)
-            stopSelf()
+        )
+
+        CoroutineScope(Dispatchers.Main).launch {
+            totalCompressedImages.collect {
+                notificationBuilder.setContentTitle("$it / ${imagesToOptions.size} Images Compressed")
+                    .setProgress(imagesToOptions.size, it, false)
+                val notificationManager =
+                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(SERVICE_ID, notificationBuilder.build())
+                if (it >= imagesToOptions.size) {
+                    onComplete(it)
+                }
+            }
         }
         return START_STICKY
+    }
+
+    private fun onComplete(totalSize : Int){
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        val completionNotification = NotificationUtil.createCompletionNotification(
+            this@ImageCompressionService,
+            "$totalSize Images compressed"
+        )
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(1, completionNotification)
+        stopSelf()
     }
 
     private fun createNotificationChannel() {

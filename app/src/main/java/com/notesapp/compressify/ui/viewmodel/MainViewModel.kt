@@ -56,7 +56,6 @@ class MainViewModel @Inject constructor(
     val selectedVideos = _selectedVideos.asStateFlow()
 
     private val _selectedImagesProcessing = MutableStateFlow(false)
-    val selectedImagesProcessing = _selectedImagesProcessing.asStateFlow()
 
     private val _selectedVideosProcessing = MutableStateFlow(false)
     val selectedVideosProcessing = _selectedVideosProcessing.asStateFlow()
@@ -70,7 +69,7 @@ class MainViewModel @Inject constructor(
 
     val compressImagesUIState = combine(
         selectedImages,
-        selectedImagesProcessing
+        _selectedImagesProcessing
     ) { images, isProcessing ->
         CompressImagesUIState(
             selectedImages = images,

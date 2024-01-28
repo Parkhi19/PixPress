@@ -1,6 +1,8 @@
 package com.notesapp.compressify
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -22,6 +25,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
@@ -30,13 +35,16 @@ import androidx.navigation.compose.rememberNavController
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.HomeScreen
+import com.notesapp.compressify.ui.components.home.common.GrantStoragePermission
 import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
 import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
 import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -45,12 +53,29 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
     private val viewModel by viewModels<MainViewModel>()
     private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
     private lateinit var selectedVideoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+
+    private val storagePermissionGrantedFlow = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        checkForStoragePermissions()
+        requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            storagePermissionGrantedFlow.value = if (isGranted) {
+                true
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Storage Permission is required to use this app",
+                    Toast.LENGTH_SHORT
+                ).show()
+                false
+            }
+        }
         setContent {
             val navController = rememberNavController()
+            val storagePermissionsGranted by storagePermissionGrantedFlow.collectAsState()
 
             LaunchedEffect(key1 = Unit) {
                 viewModel.eventsFlow.collect { event ->
@@ -66,12 +91,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                     }
                 }
             }
-            LaunchedEffect(key1 = Unit) {
-                navController.addOnDestinationChangedListener(this@MainActivity)
-                viewModel.currentRoute.collectLatest { route ->
-                    navController.navigate(route.name)
-                }
-            }
+
             selectedPhotoLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
                 onResult = { uris ->
@@ -84,19 +104,19 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
             )
             selectedVideoLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickMultipleVisualMedia(),
-                onResult = {uris->
-                    if(uris.isNotEmpty()){
+                onResult = { uris ->
+                    if (uris.isNotEmpty()) {
                         viewModel.onVideoSelected(
-                           uris = uris
+                            uris = uris
                         )
                     }
 
                 }
             )
+            checkForStoragePermissions()
             CompressifyTheme {
                 val selectedImages by viewModel.selectedImages.collectAsState()
                 val categories by viewModel.categoryStorage.collectAsState()
-                val isImageProcessing by viewModel.selectedImagesProcessing.collectAsState()
 
                 val selectedVideos by viewModel.selectedVideos.collectAsState()
                 val isVideoProcessing by viewModel.selectedVideosProcessing.collectAsState()
@@ -108,65 +128,95 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = NavigationRoutes.HOME.name,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        composable(NavigationRoutes.HOME.name) {
-                            HomeScreen(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(state = rememberScrollState()),
-                                categories = categories,
-                                onCompressImageClick = {
-                                    selectedPhotoLauncher.launch(
-                                        PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                    if (storagePermissionsGranted) {
+                        LaunchedEffect(key1 = Unit) {
+                            navController.addOnDestinationChangedListener(this@MainActivity)
+                            viewModel.currentRoute.collectLatest { route ->
+                                navController.navigate(route.name)
+                            }
+                        }
+                        NavHost(
+                            navController = navController,
+                            startDestination = NavigationRoutes.HOME.name,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            composable(NavigationRoutes.HOME.name) {
+                                HomeScreen(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(state = rememberScrollState()),
+                                    categories = categories,
+                                    onCompressImageClick = {
+                                        selectedPhotoLauncher.launch(
+                                            PickVisualMediaRequest(
+                                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                                            )
                                         )
-                                    )
-                                },
-                                onCompressVideoClick = {
-                                    selectedVideoLauncher.launch(
-                                        PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.VideoOnly
+                                    },
+                                    onCompressVideoClick = {
+                                        selectedVideoLauncher.launch(
+                                            PickVisualMediaRequest(
+                                                ActivityResultContracts.PickVisualMedia.VideoOnly
+                                            )
                                         )
-                                    )
-                                },
-                                onUIEvent = viewModel::onUIEvent
-                            )
-                        }
+                                    },
+                                    onUIEvent = viewModel::onUIEvent
+                                )
+                            }
 
-                        composable(NavigationRoutes.COMPRESS_IMAGE.name) {
-                            CompressImageOptionsScreen(
-                                compressImagesUIState = compressImagesUIState,
-                                onUIEvent = viewModel::onUIEvent,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
+                            composable(NavigationRoutes.COMPRESS_IMAGE.name) {
+                                CompressImageOptionsScreen(
+                                    compressImagesUIState = compressImagesUIState,
+                                    onUIEvent = viewModel::onUIEvent,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
 
-                        composable(NavigationRoutes.COMPRESS_VIDEO.name) {
-                            CompressVideoOptionsScreen(
-                                selectedVideos = selectedVideos,
-                                isVideoProcessing = isVideoProcessing,
-                                modifier = Modifier.fillMaxSize(),
-                                onUIEvent = viewModel::onUIEvent
-                            )
-                        }
+                            composable(NavigationRoutes.COMPRESS_VIDEO.name) {
+                                CompressVideoOptionsScreen(
+                                    selectedVideos = selectedVideos,
+                                    isVideoProcessing = isVideoProcessing,
+                                    modifier = Modifier.fillMaxSize(),
+                                    onUIEvent = viewModel::onUIEvent
+                                )
+                            }
 
-                        composable(NavigationRoutes.INDIVIDUAL_IMAGE_PREVIEW.name) {
-                            CompressIndividualImageOptionsScreen(
-                                selectedImages = selectedImages,
-                                modifier = Modifier.fillMaxSize(),
-                                compressionOptions = imageCompressionOptions,
-                                onUIEvent = viewModel::onUIEvent
-                            )
-                        }
+                            composable(NavigationRoutes.INDIVIDUAL_IMAGE_PREVIEW.name) {
+                                CompressIndividualImageOptionsScreen(
+                                    selectedImages = selectedImages,
+                                    modifier = Modifier.fillMaxSize(),
+                                    compressionOptions = imageCompressionOptions,
+                                    onUIEvent = viewModel::onUIEvent
+                                )
+                            }
 
+                        }
+                    } else {
+                        GrantStoragePermission(
+                            modifier = Modifier.fillMaxSize(),
+                            onGrantPermissionClick = {
+                                openStoragePermissionsPage()
+                            }
+                        )
                     }
                 }
             }
         }
+    }
+
+    private fun openStoragePermissionsPage() {
+        if (Build.VERSION.SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
+                val getStoragePermission = Intent()
+                getStoragePermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                startActivity(getStoragePermission)
+            }
+            return
+        }
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", packageName, null)
+        intent.setData(uri)
+        startActivity(intent)
     }
 
     override fun onDestinationChanged(
@@ -181,17 +231,43 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
     override fun onResume() {
         super.onResume()
-        viewModel.syncStorageCategory()
+        storagePermissionGrantedFlow.value = checkForStoragePermissions(false)
+        lifecycleScope.launch {
+            storagePermissionGrantedFlow.collectLatest {
+                if (it) {
+                    viewModel.syncStorageCategory()
+                }
+            }
+        }
     }
 
-    private fun checkForStoragePermissions() {
+    private fun checkForStoragePermissions(launchPermissionFlow: Boolean = true): Boolean {
         if (Build.VERSION.SDK_INT >= 30) {
             if (!Environment.isExternalStorageManager()) {
+                if (!launchPermissionFlow) {
+                    return false
+                }
                 val getStoragePermission = Intent()
                 getStoragePermission.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
                 startActivity(getStoragePermission)
+                return false
             }
+            return true
         }
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (!launchPermissionFlow) {
+                return false
+            }
+            requestPermissionLauncher.launch(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            return false
+        }
+        return true
     }
 }
 

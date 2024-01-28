@@ -192,7 +192,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
         arguments: Bundle?
     ) {
         destination.route?.let {
-            viewModel.onUIEvent(UIEvent.Navigate(NavigationRoutes.valueOf(it)))
+            controller.popBackStack(it, false)
         }
     }
 

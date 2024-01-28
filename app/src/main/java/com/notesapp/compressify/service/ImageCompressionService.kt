@@ -25,8 +25,7 @@ class ImageCompressionService : Service() {
 
     private val binder = ImageCompressionBinder()
 
-    @Inject
-    lateinit var compressAndSaveImagesUseCase: CompressAndSaveImagesUseCase
+    private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, IMAGE_COMPRESSION_NOTIFICATION_ID)
@@ -45,8 +44,17 @@ class ImageCompressionService : Service() {
                     imagesToOptions = imagesToOptions
                 )
             )
+        }.invokeOnCompletion {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            val completionNotification = NotificationUtil.createCompletionNotification(
+                this,
+                "${imagesToOptions.size} Images compressed"
+            )
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(1, completionNotification)
+            stopSelf()
         }
-        stopForeground(STOP_FOREGROUND_DETACH)
         return START_STICKY
     }
 

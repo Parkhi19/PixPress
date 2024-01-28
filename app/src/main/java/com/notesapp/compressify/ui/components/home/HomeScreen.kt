@@ -129,9 +129,9 @@ fun HomeScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Go to Library") {
-
-        }
+//        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Go to Library") {
+//
+//        }
 
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -124,6 +125,10 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val compressImagesUIState by viewModel.compressImagesUIState.collectAsState()
 
                 val imageCompressionOptions by viewModel.allImageCompressOptions.collectAsState()
+
+                if(storagePermissionsGranted){
+                    checkForNotificationPermissions()
+                }
 
                 Surface(
                     modifier = Modifier.fillMaxSize()
@@ -268,6 +273,16 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
             return false
         }
         return true
+    }
+
+    private fun checkForNotificationPermissions(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                startActivity(intent)
+            }
+        }
     }
 }
 

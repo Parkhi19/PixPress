@@ -242,7 +242,7 @@ class MainViewModel @Inject constructor(
                 }
             }
 
-            is UIEvent.Videos.VideoCompressionOptionsConfirmed -> TODO()
+            is UIEvent.Videos.VideoCompressionOptionsApplied -> TODO()
         }
     }
 

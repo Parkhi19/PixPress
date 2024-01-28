@@ -19,10 +19,10 @@ sealed interface UIEvent {
 
     sealed interface Videos : UIEvent{
         data class RemoveVideoClicked(val path: String) : Videos
-        data class VideoCompressionOptionsConfirmed(
+        data class VideoCompressionOptionsApplied(
             val resolution: Float,
             val quality: Float,
-            val keepOriginal: Boolean
+            val deleteOriginal: Boolean
         ) : Videos
 
         data class OnVideosAdded(val uris: List<Uri>) : Videos

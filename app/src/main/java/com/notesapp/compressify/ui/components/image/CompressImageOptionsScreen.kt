@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
@@ -114,7 +113,7 @@ fun CompressImageOptionsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         if (showOptionsBottomSheet) {
-            ImageCompressionOptionsDialog(
+            CompressionOptionsDialog(
                 modifier = Modifier.fillMaxWidth(),
                 onDismiss = {
                     showOptionsBottomSheet = false

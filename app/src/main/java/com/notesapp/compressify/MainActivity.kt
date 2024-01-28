@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -14,19 +15,13 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
@@ -35,15 +30,11 @@ import androidx.navigation.compose.rememberNavController
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.HomeScreen
-import com.notesapp.compressify.ui.components.home.common.CompressionCompletedDialog
 import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
 import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
 import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
-import com.notesapp.compressify.util.UIEvent
-import com.notesapp.compressify.util.getAbsoluteImagePath
-import com.notesapp.compressify.util.getAbsoluteVideoPath
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 
@@ -60,17 +51,18 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
         checkForStoragePermissions()
         setContent {
             val navController = rememberNavController()
-            var showCompressionCompletedDialog by remember {
-                mutableStateOf(false)
-            }
+
             LaunchedEffect(key1 = Unit) {
                 viewModel.eventsFlow.collect { event ->
                     when (event) {
-                        is Event.CompressionCompleted -> {
-                            showCompressionCompletedDialog = true
+                        is Event.PopBackStackTo -> {
+                            navController.popBackStack(event.destination.name, false)
                         }
 
-                        Event.Compressing -> {}
+                        is Event.ShowToast -> {
+                            Toast.makeText(this@MainActivity, event.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
                 }
             }
@@ -171,15 +163,6 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             )
                         }
 
-                    }
-                    if (showCompressionCompletedDialog) {
-                        CompressionCompletedDialog(
-                            modifier = Modifier
-                                .height(300.dp)
-                                .width(300.dp),
-                        ) {
-                            showCompressionCompletedDialog = false
-                        }
                     }
                 }
             }

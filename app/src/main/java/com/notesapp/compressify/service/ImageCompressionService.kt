@@ -44,6 +44,7 @@ class ImageCompressionService : Service() {
         imagesToOptions.forEach {
             compressImage(it)
         }
+        stopForeground(STOP_FOREGROUND_DETACH)
         return START_STICKY
     }
 

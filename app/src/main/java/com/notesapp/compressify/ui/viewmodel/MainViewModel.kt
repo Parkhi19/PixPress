@@ -169,7 +169,6 @@ class MainViewModel @Inject constructor(
                     }
                 )
             )
-            sendEvent(Event.CompressionCompleted)
         }
     }
 
@@ -209,6 +208,8 @@ class MainViewModel @Inject constructor(
 
             is UIEvent.Videos.VideoCompressionOptionsApplied -> TODO()
             is UIEvent.Images.OnStartCompressionClick -> {
+                sendEvent(Event.PopBackStackTo(NavigationRoutes.HOME))
+                sendEvent(Event.ShowToast("Images are being compressed"))
                 startImageCompression(event.imagesToOptions)
             }
         }

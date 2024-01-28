@@ -2,6 +2,7 @@ package com.notesapp.compressify.util
 
 import android.net.Uri
 import com.notesapp.compressify.domain.model.NavigationRoutes
+import com.notesapp.compressify.ui.viewmodel.MainViewModel
 
 sealed interface UIEvent {
     sealed interface Images : UIEvent {
@@ -14,6 +15,10 @@ sealed interface UIEvent {
         ) : Images
 
         data class OnImagesAdded(val uris: List<Uri>) : Images
+
+        data class OnStartCompressionClick(
+            val imagesToOptions : List<Pair<Uri, MainViewModel.ImageCompressionOptions>>
+        ): Images
 
     }
 

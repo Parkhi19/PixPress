@@ -146,48 +146,16 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    private fun onImageCompressionOptionsConfirm(
-        resolution: Float,
-        quality: Float,
-        deleteOriginal: Boolean
+    private fun startImageCompression(
+      imagesToOptions : List<Pair<Uri, ImageCompressionOptions>>
     ) {
         viewModelScope.launch {
-            val originalUris = selectedImages.value.map {
-                it.uri
-            }
-            val compressedFiles = compressAndSaveImagesUseCase.launch(
+            compressAndSaveImagesUseCase.launch(
                 CompressAndSaveImagesUseCase.Params(
-                    context = CompressApplication.appContext,
-                    uris = originalUris,
-                    resolution = resolution,
-                    quality = quality,
-                    deleteOriginal = deleteOriginal
+                    imagesToOptions = imagesToOptions
                 )
             )
-            if (deleteOriginal) {
-                viewModelScope.launch {
-                    originalUris.forEach {
-                        deleteOriginalUseCase.launch(
-                            DeleteOriginalUseCase.Parameters(
-                                filePath = it.toFile().absolutePath
-                            )
-                        )
-                    }
-                }
-            }
-            sendEvent(Event.CompressionCompleted)
-            val originalToCompressedMap = originalUris.zip(compressedFiles)
-
-            addLibraryItemUseCase.launch(
-                AddLibraryItemUseCase.Parameters(
-                    libraryModels = originalToCompressedMap.map { (originalUri, compressedUri) ->
-                        LibraryModel(
-                            originalURI = originalUri,
-                            compressedURI = compressedUri
-                        )
-                    }
-                )
-            )
+//            sendEvent(Event.CompressionCompleted)
         }
     }
 
@@ -240,6 +208,9 @@ class MainViewModel @Inject constructor(
             }
 
             is UIEvent.Videos.VideoCompressionOptionsApplied -> TODO()
+            is UIEvent.Images.OnStartCompressionClick -> {
+                startImageCompression(event.imagesToOptions)
+            }
         }
     }
 

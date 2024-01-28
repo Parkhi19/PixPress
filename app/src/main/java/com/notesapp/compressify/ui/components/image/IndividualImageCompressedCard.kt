@@ -174,7 +174,6 @@ fun IndividualImageCompressedCard(
                     )
                 }
             }
-
         }
     }
 }

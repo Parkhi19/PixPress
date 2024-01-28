@@ -2,6 +2,9 @@ package com.notesapp.compressify.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -15,15 +18,42 @@ import java.io.File
 
 
 fun Uri.createImageThumbnail(reduceFactor: Int = 20): Bitmap {
-    val thumbnail =
-        MediaStore.Images.Media.getBitmap(CompressApplication.contentResolver, this).run {
+    val thumbnail = getBitmap().run {
             Bitmap.createScaledBitmap(this, width / reduceFactor, height / reduceFactor, false)
         }
     return thumbnail
 }
 
 fun Uri.getBitmap(): Bitmap {
-    return MediaStore.Images.Media.getBitmap(CompressApplication.contentResolver, this)
+    val bitmap = BitmapFactory.decodeFile(toFile().absolutePath)
+    val exifInterface = ExifInterface(toFile().absolutePath)
+    val orientation = exifInterface.getAttributeInt(
+        ExifInterface.TAG_ORIENTATION,
+        ExifInterface.ORIENTATION_NORMAL
+    )
+    return when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> {
+            bitmap.rotate(90f)
+        }
+
+        ExifInterface.ORIENTATION_ROTATE_180 -> {
+            bitmap.rotate(180f)
+        }
+
+        ExifInterface.ORIENTATION_ROTATE_270 -> {
+            bitmap.rotate(270f)
+        }
+
+        else -> {
+            bitmap
+        }
+    }
+}
+
+fun Bitmap.rotate(angle: Float): Bitmap {
+    val matrix = Matrix()
+    matrix.postRotate(angle)
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
 }
 
 fun Uri.createVideoThumbnail(): Bitmap {

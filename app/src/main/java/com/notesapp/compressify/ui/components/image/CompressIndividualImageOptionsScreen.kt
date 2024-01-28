@@ -91,7 +91,13 @@ fun CompressIndividualImageOptionsScreen(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
-                onClick = { /*TODO*/ },
+                onClick = {
+                    onUIEvent(
+                        UIEvent.Images.OnStartCompressionClick(
+                            individualOptions.toList()
+                        )
+                    )
+                },
                 buttonText = "Start Compression"
             )
         }

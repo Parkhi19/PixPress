@@ -1,6 +1,7 @@
 package com.notesapp.compressify.ui.viewmodel
 
 import android.net.Uri
+import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.domain.useCase.DeleteOriginalUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
+import com.notesapp.compressify.service.ImageCompressionService
 import com.notesapp.compressify.ui.components.image.CompressImagesUIState
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getAbsoluteImagePath
@@ -150,12 +152,11 @@ class MainViewModel @Inject constructor(
       imagesToOptions : List<Pair<Uri, ImageCompressionOptions>>
     ) {
         viewModelScope.launch {
-            compressAndSaveImagesUseCase.launch(
-                CompressAndSaveImagesUseCase.Params(
-                    imagesToOptions = imagesToOptions
-                )
+            val intent = ImageCompressionService.getIntent(
+                context = CompressApplication.appContext,
+                imagesToOptions = imagesToOptions
             )
-//            sendEvent(Event.CompressionCompleted)
+            ContextCompat.startForegroundService(CompressApplication.appContext, intent)
         }
     }
 

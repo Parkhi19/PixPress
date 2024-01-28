@@ -6,29 +6,27 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Parcelable
-import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toFile
-import androidx.core.net.toUri
-import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.R
+import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
-import com.notesapp.compressify.util.FileUtil
-import com.notesapp.compressify.util.getBitmap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-import java.io.FileOutputStream
+import javax.inject.Inject
 
 class ImageCompressionService : Service() {
 
     private val binder = ImageCompressionBinder()
 
+    @Inject
+    lateinit var compressAndSaveImagesUseCase: CompressAndSaveImagesUseCase
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, IMAGE_COMPRESSION_NOTIFICATION_ID)
@@ -41,8 +39,12 @@ class ImageCompressionService : Service() {
             IMAGE_TO_OPTIONS
         ) ?: emptyList<ImageCompressionModel>()
 
-        imagesToOptions.forEach {
-            compressImage(it)
+        CoroutineScope(Dispatchers.IO).launch {
+            compressAndSaveImagesUseCase.launch(
+                CompressAndSaveImagesUseCase.Params(
+                    imagesToOptions = imagesToOptions
+                )
+            )
         }
         stopForeground(STOP_FOREGROUND_DETACH)
         return START_STICKY
@@ -61,37 +63,6 @@ class ImageCompressionService : Service() {
 
     override fun onBind(intent: Intent?): IBinder {
         return binder
-    }
-
-    private fun compressImage(compressionModel: ImageCompressionModel) {
-        val originalExtension = compressionModel.uri.toFile().extension
-
-        val bitmap = compressionModel.uri.getBitmap()
-        val compressedHeight = bitmap.height * compressionModel.resolution
-        val compressedWidth = bitmap.width * compressionModel.resolution
-        val compressedBitmap = Bitmap.createScaledBitmap(
-            bitmap,
-            compressedWidth.toInt(),
-            compressedHeight.toInt(),
-            false
-        )
-
-        val resultFile = FileUtil.getNewImageFile(".$originalExtension")
-        val outputStream = FileOutputStream(resultFile)
-        val compressionType = when (originalExtension) {
-            "jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
-            "png" -> Bitmap.CompressFormat.PNG
-            "webp" -> Bitmap.CompressFormat.WEBP
-            else -> Bitmap.CompressFormat.JPEG
-        }
-        compressedBitmap.compress(
-            compressionType,
-            (compressionModel.quality * 100).toInt(),
-            outputStream
-        )
-        outputStream.flush()
-        outputStream.close()
-        resultFile.toUri()
     }
 
     @Parcelize

@@ -286,11 +286,11 @@ fun Uri.getAbsoluteVideoPath(): Uri? {
 private fun Uri.getAbsolutePathAboveAPI29(
     category: MediaCategory
 ): String? {
-    val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+    val projection = arrayOf(MediaStore.MediaColumns._ID)
     val cursor = CompressApplication.contentResolver.query(this, projection, null, null, null)
     val displayID = cursor?.use {
         it.moveToFirst()
-        val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+        val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
         it.getString(index).substringBeforeLast(".")
     }
     return queryData(

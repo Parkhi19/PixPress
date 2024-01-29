@@ -25,6 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Compressify"
         android:name=".CompressApplication"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"

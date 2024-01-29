@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
@@ -34,8 +36,7 @@ import com.notesapp.compressify.util.UIEvent
 @Composable
 fun CompressVideoOptionsScreen(
     modifier: Modifier = Modifier,
-    selectedVideos: List<VideoModel>,
-    isVideoProcessing: Boolean,
+    compressVideosUIState: CompressVideosUIState,
     onUIEvent: (UIEvent) -> Unit
 ) {
     var resolution by remember {
@@ -51,6 +52,7 @@ fun CompressVideoOptionsScreen(
     var showOptionsBottomSheet by remember {
         mutableStateOf(false)
     }
+    val (selectedVideos, isVideoProcessing) = compressVideosUIState
     val selectedVideoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { onUIEvent(UIEvent.Videos.OnVideosAdded(it)) }
@@ -99,7 +101,9 @@ fun CompressVideoOptionsScreen(
                         quality = quality,
                         deleteOriginal = deleteOriginal
                     )
+                    onUIEvent(UIEvent.Navigate(NavigationRoutes.INDIVIDUAL_VIDEO_PREVIEW))
                 }
+
             )
         }
 
@@ -122,4 +126,10 @@ fun CompressVideoOptionsScreen(
         }
     }
 }
+
+@Stable
+data class CompressVideosUIState(
+    val selectedVideos: List<VideoModel> = emptyList(),
+    val isVideoProcessing: Boolean = false
+)
 

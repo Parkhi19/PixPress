@@ -39,6 +39,7 @@ import com.notesapp.compressify.ui.components.home.HomeScreen
 import com.notesapp.compressify.ui.components.home.common.GrantStoragePermission
 import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
 import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
+import com.notesapp.compressify.ui.components.video.CompressIndividualVideoScreen
 import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
@@ -123,8 +124,10 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val isVideoProcessing by viewModel.selectedVideosProcessing.collectAsState()
 
                 val compressImagesUIState by viewModel.compressImagesUIState.collectAsState()
+                val compressVideosUIState by viewModel.compressVideosUIState.collectAsState()
 
                 val imageCompressionOptions by viewModel.allImageCompressOptions.collectAsState()
+                val videoCompressionOptions by viewModel.allVideoCompressOptions.collectAsState()
 
                 if(storagePermissionsGranted){
                     checkForNotificationPermissions()
@@ -179,8 +182,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
                             composable(NavigationRoutes.COMPRESS_VIDEO.name) {
                                 CompressVideoOptionsScreen(
-                                    selectedVideos = selectedVideos,
-                                    isVideoProcessing = isVideoProcessing,
+                                   compressVideosUIState = compressVideosUIState,
                                     modifier = Modifier.fillMaxSize(),
                                     onUIEvent = viewModel::onUIEvent
                                 )
@@ -191,6 +193,15 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                                     selectedImages = selectedImages,
                                     modifier = Modifier.fillMaxSize(),
                                     compressionOptions = imageCompressionOptions,
+                                    onUIEvent = viewModel::onUIEvent
+                                )
+                            }
+
+                            composable(NavigationRoutes.INDIVIDUAL_VIDEO_PREVIEW.name) {
+                                CompressIndividualVideoScreen(
+                                    selectedVideos = selectedVideos,
+                                    modifier = Modifier.fillMaxSize(),
+                                    compressionOptions = videoCompressionOptions,
                                     onUIEvent = viewModel::onUIEvent
                                 )
                             }

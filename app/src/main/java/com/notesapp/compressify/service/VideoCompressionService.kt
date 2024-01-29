@@ -1,6 +1,5 @@
 package com.notesapp.compressify.service
 
-
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -11,52 +10,53 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Parcelable
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.asLiveData
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
+import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-import javax.inject.Inject
 
-class ImageCompressionService : Service() {
+class VideoCompressionService : Service() {
 
-    private val binder = ImageCompressionBinder()
+    private val binder = VideoCompressionBinder()
 
-    private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase()
+    private val compressAndSaveVideoUseCase = CompressAndSaveVideoUseCase()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val imagesToOptions = intent?.getParcelableArrayListExtra(
-            IMAGE_TO_OPTIONS
-        ) ?: emptyList<ImageCompressionModel>()
+        Log.d(TAG, "onStartCommand: ")
+        val videosToOptions = intent?.getParcelableArrayListExtra(
+            VIDEO_TO_OPTIONS
+        ) ?: emptyList<VideoCompressionModel>()
         createNotificationChannel()
         val notificationBuilder =
-            NotificationCompat.Builder(this, IMAGE_COMPRESSION_NOTIFICATION_ID)
-                .setContentTitle("0 / ${imagesToOptions.size} Images Compressed")
-                .setProgress(imagesToOptions.size, 0, false)
+            NotificationCompat.Builder(this, VIDEO_COMPRESSION_NOTIFICATION_ID)
+                .setContentTitle("0 / ${videosToOptions.size} Videos Compressed")
+                .setProgress(videosToOptions.size, 0, false)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setSmallIcon(R.drawable.ic_category_image)
+                .setSmallIcon(R.drawable.ic_category_video)
         val notification = notificationBuilder.build()
         startForeground(SERVICE_ID, notification)
 
 
-        val totalCompressedImages = compressAndSaveImagesUseCase.launchWithFlow(
-            CompressAndSaveImagesUseCase.Params(
-                imagesToOptions = imagesToOptions
+        val totalCompressedVideos = compressAndSaveVideoUseCase.launchWithFlow(
+            CompressAndSaveVideoUseCase.Params(
+                videosToOptions = videosToOptions
             )
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            totalCompressedImages.collect {
-                notificationBuilder.setContentTitle("$it / ${imagesToOptions.size} Images Compressed")
-                    .setProgress(imagesToOptions.size, it, false)
+            totalCompressedVideos.collect {
+                notificationBuilder.setContentTitle("$it / ${videosToOptions.size} Videos Compressed")
+                    .setProgress(videosToOptions.size, it, false)
                 val notificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.notify(SERVICE_ID, notificationBuilder.build())
-                if (it >= imagesToOptions.size) {
+                if (it >= videosToOptions.size) {
                     onComplete(it)
                 }
             }
@@ -67,19 +67,19 @@ class ImageCompressionService : Service() {
     private fun onComplete(totalSize : Int){
         stopForeground(STOP_FOREGROUND_REMOVE)
         val completionNotification = NotificationUtil.createCompletionNotification(
-            this@ImageCompressionService,
-            "$totalSize Images compressed"
+            this@VideoCompressionService,
+            "$totalSize Videos compressed"
         )
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(1, completionNotification)
+        notificationManager.notify(2, completionNotification)
         stopSelf()
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
-                IMAGE_COMPRESSION_NOTIFICATION_ID, IMAGE_COMPRESSION_NOTIFICATION_ID,
+                VIDEO_COMPRESSION_NOTIFICATION_ID, VIDEO_COMPRESSION_NOTIFICATION_ID,
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             val manager = getSystemService(NotificationManager::class.java)
@@ -92,29 +92,29 @@ class ImageCompressionService : Service() {
     }
 
     @Parcelize
-    data class ImageCompressionModel(
+    data class VideoCompressionModel(
         val uri: Uri,
         val resolution: Float,
         val quality: Float,
         val deleteOriginal: Boolean
-    ) : Parcelable
+    ) : Parcelable {
+    }
 
-    inner class ImageCompressionBinder : Binder() {
-        // Return this instance of LocalService so clients can call public methods.
-        fun getService(): ImageCompressionService = this@ImageCompressionService
+    inner class VideoCompressionBinder: Binder() {
+        fun getService(): VideoCompressionService = this@VideoCompressionService
     }
 
     companion object {
-        const val TAG = "ImageCompressionService"
-        private const val IMAGE_TO_OPTIONS = "com.notesapp.compressify.service.imagesToOptions"
-        private const val IMAGE_COMPRESSION_NOTIFICATION_ID = "Image Compression"
-        private const val SERVICE_ID = 100
+        const val TAG = "VideoCompressionService"
+        private const val VIDEO_TO_OPTIONS = "com.notesapp.compressify.service.videosToOptions"
+        private const val VIDEO_COMPRESSION_NOTIFICATION_ID = "Video Compression"
+        private const val SERVICE_ID = 101
         fun getIntent(
             context: Context,
-            imagesToOptions: List<Pair<Uri, MainViewModel.ImageCompressionOptions>>
-        ) = Intent(context, ImageCompressionService::class.java).apply {
-            val imageCompressionModels = imagesToOptions.map {
-                ImageCompressionModel(
+            videosToOptions: List<Pair<Uri, MainViewModel.VideoCompressionOptions>>
+        ) = Intent(context, VideoCompressionService::class.java).apply {
+            val videoCompressionModels = videosToOptions.map {
+                VideoCompressionModel(
                     uri = it.first,
                     resolution = it.second.resolution,
                     quality = it.second.quality,
@@ -122,10 +122,9 @@ class ImageCompressionService : Service() {
                 )
             }
             putParcelableArrayListExtra(
-                IMAGE_TO_OPTIONS,
-                ArrayList(imageCompressionModels)
+                VIDEO_TO_OPTIONS,
+                ArrayList(videoCompressionModels)
             )
         }
     }
-
 }

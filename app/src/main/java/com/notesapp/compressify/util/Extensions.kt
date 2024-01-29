@@ -23,6 +23,26 @@ fun Uri.createImageThumbnail(reduceFactor: Int = 20): Bitmap {
         }
     return thumbnail
 }
+fun Uri.getVideoWidth(): Int {
+    val mediaMetadataRetriever = MediaMetadataRetriever()
+    mediaMetadataRetriever.setDataSource(CompressApplication.appContext, this)
+    return mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+        ?.toInt() ?: 0
+}
+
+fun Uri.getVideoHeight(): Int {
+    val mediaMetadataRetriever = MediaMetadataRetriever()
+    mediaMetadataRetriever.setDataSource(CompressApplication.appContext, this)
+    return mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+        ?.toInt() ?: 0
+}
+
+fun Uri.getVideoBitrate(): Int {
+    val mediaMetadataRetriever = MediaMetadataRetriever()
+    mediaMetadataRetriever.setDataSource(CompressApplication.appContext, this)
+    return mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
+        ?.toInt() ?: 0
+}
 
 fun Uri.getBitmap(): Bitmap {
     val bitmap = BitmapFactory.decodeFile(toFile().absolutePath)
@@ -261,7 +281,7 @@ fun Double.precised(precision: Int): Double {
 }
 
 fun Uri.getAbsoluteImagePath(): Uri? {
-    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         getAbsolutePathAboveAPI29(MediaCategory.IMAGE)
     } else {
         getAbsolutePathBelowAPI29(MediaCategory.IMAGE)
@@ -272,7 +292,7 @@ fun Uri.getAbsoluteImagePath(): Uri? {
 }
 
 fun Uri.getAbsoluteVideoPath(): Uri? {
-    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         getAbsolutePathAboveAPI29(MediaCategory.VIDEO)
     } else {
         getAbsolutePathBelowAPI29(MediaCategory.VIDEO)
@@ -282,15 +302,15 @@ fun Uri.getAbsoluteVideoPath(): Uri? {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
+@RequiresApi(Build.VERSION_CODES.O)
 private fun Uri.getAbsolutePathAboveAPI29(
     category: MediaCategory
 ): String? {
-    val projection = arrayOf(MediaStore.MediaColumns._ID)
+    val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
     val cursor = CompressApplication.contentResolver.query(this, projection, null, null, null)
     val displayID = cursor?.use {
         it.moveToFirst()
-        val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+        val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
         it.getString(index).substringBeforeLast(".")
     }
     return queryData(

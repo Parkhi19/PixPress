@@ -1,30 +1,65 @@
 package com.notesapp.compressify.domain.useCase
 
-import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toFile
 import com.iceteck.silicompressorr.SiliCompressor
 import com.notesapp.compressify.CompressApplication
+import com.notesapp.compressify.service.VideoCompressionService
 import com.notesapp.compressify.util.FileUtil
+import com.notesapp.compressify.util.getVideoBitrate
+import com.notesapp.compressify.util.getVideoHeight
+import com.notesapp.compressify.util.getVideoWidth
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.io.File
 import javax.inject.Inject
 
-class CompressAndSaveVideoUseCase @Inject constructor(): BaseUseCase<CompressAndSaveVideoUseCase.Params, Unit>() {
+class CompressAndSaveVideoUseCase @Inject constructor() :
+    BaseUseCase<CompressAndSaveVideoUseCase.Params, Int>() {
     data class Params(
-        val uris: List<Uri>,
+        val videosToOptions: List<VideoCompressionService.VideoCompressionModel>
     ) : Parameters()
 
+    override suspend fun launch(parameters: CompressAndSaveVideoUseCase.Params): Int {
+        coroutineScope {
+            parameters.videosToOptions.forEach { compressionModel ->
+                compressVideo(compressionModel)
+            }
+        }
+        return parameters.videosToOptions.size
+    }
 
-    override suspend fun launch(parameters: Params) {
-        parameters.uris.forEach{
-            compressVideo(it)
+    override fun launchWithFlow(parameters: Params): Flow<Int> = flow {
+        emit(0)
+        coroutineScope {
+            var compressed = 0
+            parameters.videosToOptions.forEach { compressionModel ->
+                compressVideo(compressionModel)
+                if (compressionModel.deleteOriginal) {
+                    compressionModel.uri.toFile().delete()
+                }
+                compressed++
+                emit(compressed)
+            }
         }
     }
-    private fun compressVideo(uri: Uri){
+
+    private fun compressVideo(compressionModel: VideoCompressionService.VideoCompressionModel) {
+        val height = compressionModel.uri.getVideoHeight() * compressionModel.resolution
+        val width = compressionModel.uri.getVideoWidth() * compressionModel.resolution
+
         val filePath = SiliCompressor.with(CompressApplication.appContext)
-            .compressVideo(uri, FileUtil.videoFilesDirectory.absolutePath)
+            .compressVideo(
+                compressionModel.uri,
+                FileUtil.videoFilesDirectory.absolutePath,
+                width.toInt(),
+                height.toInt(),
+                0
+            )
         Log.d("VideoCompressorResult", "Compressed video saved to $filePath")
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val file = File(filePath)
             val resultFolder = FileUtil.videoFilesDirectory
             file.copyTo(File(resultFolder, file.name), true)

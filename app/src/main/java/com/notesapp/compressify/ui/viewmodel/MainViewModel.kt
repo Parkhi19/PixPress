@@ -17,7 +17,9 @@ import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.domain.useCase.DeleteFilesUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
 import com.notesapp.compressify.service.ImageCompressionService
+import com.notesapp.compressify.service.VideoCompressionService
 import com.notesapp.compressify.ui.components.image.CompressImagesUIState
+import com.notesapp.compressify.ui.components.video.CompressVideosUIState
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getAbsoluteImagePath
 import com.notesapp.compressify.util.getAbsoluteVideoPath
@@ -63,6 +65,7 @@ class MainViewModel @Inject constructor(
 
     private val _allImageCompressOptions = MutableStateFlow(ImageCompressionOptions())
     val allImageCompressOptions = _allImageCompressOptions.asStateFlow()
+    val allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
 
 
     val compressImagesUIState = combine(
@@ -74,6 +77,16 @@ class MainViewModel @Inject constructor(
             isImageProcessing = isProcessing
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, CompressImagesUIState())
+
+    val compressVideosUIState = combine(
+        selectedVideos,
+        _selectedVideosProcessing
+    ) { videos, isVideoProcessing ->
+        CompressVideosUIState(
+            selectedVideos = videos,
+            isVideoProcessing = isVideoProcessing
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, CompressVideosUIState())
 
     private val eventChannel = Channel<Event> { }
     val eventsFlow = eventChannel.receiveAsFlow()
@@ -146,7 +159,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun startImageCompression(
-      imagesToOptions : List<Pair<Uri, ImageCompressionOptions>>
+        imagesToOptions: List<Pair<Uri, ImageCompressionOptions>>
     ) {
         viewModelScope.launch {
             val intent = ImageCompressionService.getIntent(
@@ -157,18 +170,28 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun onVideoCompressionOptionsConfirm(
-    ) {
+    private fun startVideoCompression(videosToOptions: List<Pair<Uri, MainViewModel.VideoCompressionOptions>>) {
         viewModelScope.launch {
-            compressAndSaveVideosUseCase.launch(
-                CompressAndSaveVideoUseCase.Params(
-                    uris = selectedVideos.value.map {
-                        it.uri
-                    }
-                )
+            val intent = VideoCompressionService.getIntent(
+                context = CompressApplication.appContext,
+                videosToOptions = videosToOptions
             )
+            ContextCompat.startForegroundService(CompressApplication.appContext, intent)
         }
     }
+
+//    private fun onVideoCompressionOptionsConfirm(
+//    ) {
+//        viewModelScope.launch {
+//            compressAndSaveVideosUseCase.launch(
+//                CompressAndSaveVideoUseCase.Params(
+//                    uris = selectedVideos.value.map {
+//                        it.uri
+//                    }
+//                )
+//            )
+//        }
+//    }
 
     fun onUIEvent(event: UIEvent) {
         when (event) {
@@ -210,8 +233,15 @@ class MainViewModel @Inject constructor(
                 sendEvent(Event.ShowToast("Images are being compressed"))
                 startImageCompression(event.imagesToOptions)
             }
+
+            is UIEvent.Videos.OnStartCompressionClick -> {
+                sendEvent(Event.PopBackStackTo(NavigationRoutes.HOME))
+                sendEvent(Event.ShowToast("Videos are being compressed"))
+                startVideoCompression(event.videosToOptions)
+            }
         }
     }
+
 
     private fun sendEvent(event: Event) {
         viewModelScope.launch {
@@ -225,6 +255,12 @@ class MainViewModel @Inject constructor(
     }
 
     data class ImageCompressionOptions(
+        val resolution: Float = INITIAL_RESOLUTION,
+        val quality: Float = INITIAL_QUALITY,
+        val deleteOriginal: Boolean = false
+    )
+
+    data class VideoCompressionOptions(
         val resolution: Float = INITIAL_RESOLUTION,
         val quality: Float = INITIAL_QUALITY,
         val deleteOriginal: Boolean = false

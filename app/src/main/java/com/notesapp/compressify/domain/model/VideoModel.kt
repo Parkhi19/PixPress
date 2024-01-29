@@ -5,6 +5,9 @@ import android.net.Uri
 import com.notesapp.compressify.util.createVideoThumbnail
 import com.notesapp.compressify.util.getFileName
 import com.notesapp.compressify.util.getFileSize
+import com.notesapp.compressify.util.getVideoBitrate
+import com.notesapp.compressify.util.getVideoHeight
+import com.notesapp.compressify.util.getVideoWidth
 
 data class VideoModel(
     val uri: Uri,
@@ -13,5 +16,8 @@ data class VideoModel(
     val thumbnail: Bitmap
 ) {
     constructor(uri: Uri) : this(uri, uri.getFileName(), uri.getFileSize(), uri.createVideoThumbnail())
-//    constructor(uri: Uri) : this(uri, uri.getFileName(), uri.getFileSize(), uri.createThumbnail())
+
+    val width = uri.getVideoWidth()
+    val height = uri.getVideoHeight()
+    val bitrate = uri.getVideoBitrate()
 }

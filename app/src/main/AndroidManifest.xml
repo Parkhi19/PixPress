@@ -42,8 +42,13 @@
         <service
             android:name=".service.ImageCompressionService"
             android:foregroundServiceType="dataSync"
-            android:exported="false">
-        </service>
+            android:exported="false"/>
+
+        <service
+            android:name=".service.VideoCompressionService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

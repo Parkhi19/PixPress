@@ -31,6 +31,10 @@ sealed interface UIEvent {
         ) : Videos
 
         data class OnVideosAdded(val uris: List<Uri>) : Videos
+
+        data class OnStartCompressionClick(
+            val videosToOptions : List<Pair<Uri, MainViewModel.VideoCompressionOptions>>
+        ): Videos
     }
     data class Navigate(val route : NavigationRoutes) : UIEvent
 }

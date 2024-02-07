@@ -41,7 +41,9 @@ fun Uri.getVideoBitrate(): Int {
     val mediaMetadataRetriever = MediaMetadataRetriever()
     mediaMetadataRetriever.setDataSource(CompressApplication.appContext, this)
     return mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
-        ?.toInt() ?: 0
+        ?.let {
+            it.toInt() / (8 * 1024)
+    }?.toInt() ?: 0
 }
 
 fun Uri.getBitmap(): Bitmap {

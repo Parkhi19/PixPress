@@ -33,6 +33,8 @@ import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.HomeScreen
@@ -60,6 +62,9 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
     private val storagePermissionGrantedFlow = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if( !Python.isStarted() ) {
+            Python.start( AndroidPlatform( this ) )
+        }
         super.onCreate(savedInstanceState)
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()

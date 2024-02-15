@@ -9,6 +9,7 @@ import com.abedelazizshe.lightcompressorlibrary.VideoQuality
 import com.abedelazizshe.lightcompressorlibrary.config.Configuration
 import com.abedelazizshe.lightcompressorlibrary.config.SaveLocation
 import com.abedelazizshe.lightcompressorlibrary.config.SharedStorageConfiguration
+import com.chaquo.python.Python
 import com.iceteck.silicompressorr.SiliCompressor
 import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.service.VideoCompressionService
@@ -31,7 +32,7 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
         coroutineScope {
             parameters.videosToOptions.forEach { compressionModel ->
 //                compressVideo(compressionModel)
-                compressTest(compressionModel)
+//                compressTest(compressionModel)
             }
         }
         return parameters.videosToOptions.size
@@ -73,45 +74,11 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
         }
     }
 
-    private fun compressTest(compressionModel: VideoCompressionService.VideoCompressionModel) {
-        VideoCompressor.start(
-            context = CompressApplication.appContext,
-            uris = listOf(compressionModel.uri),
-            isStreamable = true,
-            sharedStorageConfiguration = SharedStorageConfiguration(
-                saveAt = SaveLocation.movies,
-            ),
-            configureWith = Configuration(
-                quality = VideoQuality.HIGH,
-                videoNames = listOf(compressionModel.uri.pathSegments.last()),
-                isMinBitrateCheckEnabled = false,
-                videoBitrateInMbps = 5,
-                disableAudio = false,
-                keepOriginalResolution = false,
-                videoWidth = 720.0,
-                videoHeight = 1280.0,
-            ),
-            listener = object : CompressionListener {
-                override fun onCancelled(index: Int) {
-                    Log.d("onCancelled", index.toString())
-                }
+    private fun pythonTest(){
+        val py = Python.getInstance()
+        val module = py.getModule("video_compression_script")
+        val video_compression = module["main"]
 
-                override fun onFailure(index: Int, failureMessage: String) {
-                    Log.d("onFailure", failureMessage)
-                }
-
-                override fun onProgress(index: Int, percent: Float) {
-                    Log.d("onProgress", index.toString())
-                }
-
-                override fun onStart(index: Int) {
-                    Log.d("onStart", index.toString())
-                }
-
-                override fun onSuccess(index: Int, size: Long, path: String?) {
-                    Log.d("onSuccess", path.toString())
-                }
-            }
-        )
     }
+
 }

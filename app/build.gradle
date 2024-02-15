@@ -5,25 +5,59 @@ plugins {
     id 'com.google.dagger.hilt.android'
     id 'io.realm.kotlin'
     id 'kotlin-parcelize'
+    id 'com.chaquo.python'
 }
 
 android {
     namespace 'com.notesapp.compressify'
     compileSdk 34
 
+    flavorDimensions "pyVersion"
+    productFlavors {
+        create("py310") { dimension = "pyVersion" }
+        create("py311") { dimension = "pyVersion" }
+    }
+
+    chaquopy {
+        defaultConfig {
+            version = "3.11"
+        }
+        productFlavors { }
+        sourceSets { }
+    }
+
+    externalNativeBuild {
+        cmake {
+            version "cmake-version"
+        }
+    }
     defaultConfig {
+
+
         applicationId "com.notesapp.compressify"
         minSdk 24
         targetSdk 34
         versionCode 3
         versionName "1.2"
-
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+        python{
+            pip{
+                install "katna"
+            }
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
     }
-
+    chaquopy {
+        productFlavors {
+            getByName("py310") { version = "3.10" }
+            getByName("py311") { version = "3.11" }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -93,7 +127,7 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:$compose_version"
     implementation "com.airbnb.android:lottie-compose:$lottie_version"
     implementation "com.airbnb.android:lottie-compose:6.1.0"
-    implementation "androidx.compose.material3:material3:1.2.0-rc01"
+    implementation "androidx.compose.material3:material3:1.2.0"
     implementation("com.iceteck.silicompressorr:silicompressor:2.2.4")
     implementation("org.mp4parser:isoparser:1.9.41")
     implementation ("org.mp4parser:muxer:1.9.41")

@@ -62,10 +62,16 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
     private val storagePermissionGrantedFlow = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
+        super.onCreate(savedInstanceState)
         if( !Python.isStarted() ) {
             Python.start( AndroidPlatform( this ) )
         }
-        super.onCreate(savedInstanceState)
+
+        val py = Python.getInstance()
+        val module = py.getModule( "video_compression_script" )
+        module.callAttr("main")
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->

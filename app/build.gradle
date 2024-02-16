@@ -20,7 +20,7 @@ android {
 
     chaquopy {
         defaultConfig {
-            version = "3.11"
+            version = "3.8"
         }
         productFlavors { }
         sourceSets { }
@@ -43,6 +43,7 @@ android {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
         python{
+            buildPython "C:/Users/Parkhi Goyal/AppData/Local/Programs/Python/Python311/python.exe"
             pip{
                 install "katna"
             }
@@ -54,8 +55,7 @@ android {
     }
     chaquopy {
         productFlavors {
-            getByName("py310") { version = "3.10" }
-            getByName("py311") { version = "3.11" }
+            getByName("py311") { version = "3.8" }
         }
     }
     buildTypes {

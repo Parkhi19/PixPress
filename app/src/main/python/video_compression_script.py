@@ -1,4 +1,8 @@
 import os
+
+ffmpeg_path = "C:/ffmpeg/ffmpeg.exe"
+
+os.environ["IMAGEIO_FFMPEG_EXE"] = ffmpeg_path
 from Katna.video import Video
 
 def main():
@@ -8,10 +12,10 @@ def main():
        output_folder_for_compressed_videos= "compressed_folder"
        out_dir_path = os.path.join(".", output_folder_for_compressed_videos)
 
-       if not os.path.is dir(out_dir_path):
+       if not os.path.isdir(out_dir_path):
             os.mkdir(out_dir_path)
 
-       video_file_path = os.path.join(".", "tests", "data", "pos_video.mp4")
+       video_file_path = os.path.join(".", "test.mp4")
        print(f"Input video file path = {video_file_path}")
 
        status = vd.compress_video(

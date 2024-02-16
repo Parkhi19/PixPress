@@ -43,7 +43,7 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
         coroutineScope {
             var compressed = 0
             parameters.videosToOptions.forEach { compressionModel ->
-                compressTest(compressionModel)
+//                compressTest(compressionModel)
 //                compressVideo(compressionModel)
                 if (compressionModel.deleteOriginal) {
                     compressionModel.uri.toFile().delete()
@@ -74,11 +74,6 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
         }
     }
 
-    private fun pythonTest(){
-        val py = Python.getInstance()
-        val module = py.getModule("video_compression_script")
-        val video_compression = module["main"]
 
-    }
 
 }

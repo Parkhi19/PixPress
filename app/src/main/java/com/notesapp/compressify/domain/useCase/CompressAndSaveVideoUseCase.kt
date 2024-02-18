@@ -23,17 +23,20 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
 
     override suspend fun launch(parameters: Params): Int {
         var compressed = 0
-        var totalProgress = 0
+        val totalProgress = parameters.videosToOptions.associate {
+            it.uri to 0
+        }.toMutableMap()
         parameters.videosToOptions.forEach { compressionModel ->
             compressVideo(
                 compressionModel = compressionModel,
                 onProgress = {
-                    totalProgress += it
-                    parameters.onProgress(compressed, it)
+                    totalProgress[compressionModel.uri] = it
+                    parameters.onProgress(compressed, totalProgress.values.sum()/totalProgress.size)
                 },
                 onComplete = {
                     compressed++
-                    parameters.onProgress(compressed, totalProgress)
+                    totalProgress[compressionModel.uri] = 100
+                    parameters.onProgress(compressed, totalProgress.values.sum()/totalProgress.size)
                 }
             )
         }

@@ -35,7 +35,7 @@ class VideoCompressionService : Service() {
         val notificationBuilder =
             NotificationCompat.Builder(this, VIDEO_COMPRESSION_NOTIFICATION_ID)
                 .setContentTitle("Compressing ${videosToOptions.size} Videos")
-                .setProgress(videosToOptions.size * 100, 0, false)
+                .setProgress(100, 0, false)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setSmallIcon(R.drawable.ic_category_video)
@@ -44,11 +44,9 @@ class VideoCompressionService : Service() {
 
 
         CoroutineScope(Dispatchers.IO).launch {
-            val onProgress: (Int, Int) -> Unit = { compressed, currentProgress ->
-                val totalProgress = videosToOptions.size * 100
-                val progress = (compressed * 100) + currentProgress
-                notificationBuilder.setContentTitle("Compressing ${videosToOptions.size} Videos (${currentProgress/videosToOptions.size}%)")
-                    .setProgress(totalProgress, progress, false)
+            val onProgress: (Int, Int) -> Unit = { compressed, totalProgress ->
+                notificationBuilder.setContentTitle("Compressing ${videosToOptions.size} Videos (${totalProgress}%)")
+                    .setProgress(100, totalProgress, false)
                     .setContentText("Compressed $compressed of ${videosToOptions.size} videos")
                 val notificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -34,8 +34,8 @@ class VideoCompressionService : Service() {
         createNotificationChannel()
         val notificationBuilder =
             NotificationCompat.Builder(this, VIDEO_COMPRESSION_NOTIFICATION_ID)
-                .setContentTitle("0 / ${videosToOptions.size} Videos Compressed")
-                .setProgress(videosToOptions.size, 0, false)
+                .setContentTitle("Compressing ${videosToOptions.size} Videos")
+                .setProgress(videosToOptions.size * 100, 0, false)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setSmallIcon(R.drawable.ic_category_video)
@@ -43,23 +43,26 @@ class VideoCompressionService : Service() {
         startForeground(SERVICE_ID, notification)
 
 
-        val totalCompressedVideos = compressAndSaveVideoUseCase.launchWithFlow(
-            CompressAndSaveVideoUseCase.Params(
-                videosToOptions = videosToOptions
-            )
-        )
-
         CoroutineScope(Dispatchers.IO).launch {
-            totalCompressedVideos.collect {
-                notificationBuilder.setContentTitle("$it / ${videosToOptions.size} Videos Compressed")
-                    .setProgress(videosToOptions.size, it, false)
+            val onProgress: (Int, Int) -> Unit = { compressed, currentProgress ->
+                val totalProgress = videosToOptions.size * 100
+                val progress = (compressed * 100) + currentProgress
+                notificationBuilder.setContentTitle("Compressing ${videosToOptions.size} Videos (${currentProgress/videosToOptions.size}%)")
+                    .setProgress(totalProgress, progress, false)
+                    .setContentText("Compressed $compressed of ${videosToOptions.size} videos")
                 val notificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.notify(SERVICE_ID, notificationBuilder.build())
-                if (it >= videosToOptions.size) {
-                    onComplete(it)
+                if (compressed >= videosToOptions.size) {
+                    onComplete(compressed)
                 }
             }
+            compressAndSaveVideoUseCase.launch(
+                CompressAndSaveVideoUseCase.Params(
+                    videosToOptions = videosToOptions,
+                    onProgress = onProgress
+                )
+            )
         }
         return START_STICKY
     }

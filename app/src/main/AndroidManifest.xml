@@ -48,7 +48,9 @@
             android:name=".service.VideoCompressionService"
             android:foregroundServiceType="dataSync"
             android:exported="false"/>
-
+        <property
+            android:name="android.content.MEDIA_CAPABILITIES"
+            android:resource="@xml/media_capabilities" />
     </application>
 
 </manifest>

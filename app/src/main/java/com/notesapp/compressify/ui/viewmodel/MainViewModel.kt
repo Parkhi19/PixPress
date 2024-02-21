@@ -8,6 +8,8 @@ import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.domain.model.LibraryModel
+import com.notesapp.compressify.domain.model.MediaCategory
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
@@ -104,6 +106,7 @@ class MainViewModel @Inject constructor(
                 }
             }.awaitAll()
             _selectedImagesProcessing.value = false
+
         }
 
     }
@@ -120,7 +123,23 @@ class MainViewModel @Inject constructor(
                 }
             }.awaitAll()
             _selectedVideosProcessing.value = false
+            val libraryModels: MutableList<LibraryModel> = mutableListOf()
+            uris.forEach {
+                val libraryModel = LibraryModel(
+                    id = "",
+                    originalURI = it,
+                    compressedURI = null,
+                    timeStamp = 0,
+                    category = MediaCategory.VIDEO
+                )
+                libraryModels.add(libraryModel)
+            }
+
+
+            val parameters = AddLibraryItemUseCase.Parameters(libraryModels)
+            addLibraryItemUseCase.launch(parameters)
         }
+
     }
 
     private fun onImageAdded(uris: List<Uri>) {

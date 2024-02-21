@@ -14,19 +14,26 @@ import android.os.Parcelable
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.asLiveData
 import com.notesapp.compressify.R
+import com.notesapp.compressify.data.repository.LibraryRepository
+import com.notesapp.compressify.domain.model.LibraryModel
+import com.notesapp.compressify.domain.repository.LibraryRepositoryImpl
+import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-
 class ImageCompressionService : Service() {
+//    @Inject lateinit var libraryRepository: LibraryRepository
+
+    private val libraryRepository: LibraryRepository = LibraryRepositoryImpl()
 
     private val binder = ImageCompressionBinder()
-
-    private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase()
+    private val addLibraryItemUseCase = AddLibraryItemUseCase(libraryRepository)
+    private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase(addLibraryItemUseCase)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val imagesToOptions = intent?.getParcelableArrayListExtra(
             IMAGE_TO_OPTIONS

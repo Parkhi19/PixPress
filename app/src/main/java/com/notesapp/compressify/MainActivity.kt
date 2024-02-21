@@ -41,6 +41,7 @@ import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
 import com.notesapp.compressify.ui.components.image.CompressIndividualImageOptionsScreen
 import com.notesapp.compressify.ui.components.video.CompressIndividualVideoScreen
 import com.notesapp.compressify.ui.components.video.CompressVideoOptionsScreen
+import com.notesapp.compressify.ui.library.LibraryScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,7 +61,10 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
     private val storagePermissionGrantedFlow = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
         super.onCreate(savedInstanceState)
+
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -168,6 +172,9 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                                             )
                                         )
                                     },
+                                    onLibraryButtonClick = {
+
+                                    },
                                     onUIEvent = viewModel::onUIEvent
                                 )
                             }
@@ -203,6 +210,11 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                                     modifier = Modifier.fillMaxSize(),
                                     compressionOptions = videoCompressionOptions,
                                     onUIEvent = viewModel::onUIEvent
+                                )
+                            }
+                            composable(NavigationRoutes.LIBRARY.name) {
+                                LibraryScreen(
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
 

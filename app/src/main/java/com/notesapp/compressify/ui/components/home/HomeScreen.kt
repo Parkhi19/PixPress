@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.CategoryModel
+import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.CustomCircularProgress
 import com.notesapp.compressify.ui.components.home.common.PrimaryButtonOutlined
 import com.notesapp.compressify.ui.theme.primaryColor
@@ -40,6 +41,7 @@ fun HomeScreen(
     categories: List<CategoryModel>,
     onCompressImageClick: () -> Unit,
     onCompressVideoClick: () -> Unit,
+    onLibraryButtonClick : ()-> Unit,
     onUIEvent: (UIEvent) -> Unit
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -129,12 +131,15 @@ fun HomeScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-//        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Go to Library") {
-//
-//        }
+
+        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Chaqopy", onClick = {
+            onUIEvent(UIEvent.Navigate(NavigationRoutes.LIBRARY))
+        })
+
+        }
 
     }
-}
+
 
 
 @Composable

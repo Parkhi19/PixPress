@@ -8,20 +8,27 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.notesapp.compressify.CompressApplication
+import com.notesapp.compressify.domain.model.LibraryModel
+import com.notesapp.compressify.domain.model.MediaCategory
 import com.notesapp.compressify.service.ImageCompressionService
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.FileUtil
 import com.notesapp.compressify.util.getBitmap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
+import java.util.UUID
 import javax.inject.Inject
 
-class CompressAndSaveImagesUseCase @Inject constructor() :
+class CompressAndSaveImagesUseCase @Inject constructor(
+    private val addLibraryItemUseCase: AddLibraryItemUseCase
+) :
     BaseUseCase<CompressAndSaveImagesUseCase.Params, Int>() {
     data class Params(
         val imagesToOptions: List<ImageCompressionService.ImageCompressionModel>
@@ -58,7 +65,23 @@ class CompressAndSaveImagesUseCase @Inject constructor() :
         }
     }
 
-    private fun compressImage(compressionModel: ImageCompressionService.ImageCompressionModel): Uri {
+   private suspend fun saveToLibrary(uris : List<Uri>, compressedUris : List<Uri>){
+       val libraryModels = uris.zip(compressedUris).map {(uri, compressedUri)->
+
+           LibraryModel(
+               id = UUID.randomUUID().toString(),
+               originalURI = uri,
+               compressedURI = compressedUri,
+               timeStamp = System.currentTimeMillis(),
+               category = MediaCategory.IMAGE
+           )
+       }
+
+       val parameters = AddLibraryItemUseCase.Parameters(libraryModels)
+       addLibraryItemUseCase.launch(parameters)
+    }
+
+    suspend private fun compressImage(compressionModel: ImageCompressionService.ImageCompressionModel): Uri {
         val originalExtension = compressionModel.uri.toFile().extension
 
         val bitmap = compressionModel.uri.getBitmap()
@@ -86,6 +109,8 @@ class CompressAndSaveImagesUseCase @Inject constructor() :
         )
         outputStream.flush()
         outputStream.close()
+        saveToLibrary(listOf(compressionModel.uri), listOf(resultFile.toUri()))
+
         return resultFile.toUri()
     }
 

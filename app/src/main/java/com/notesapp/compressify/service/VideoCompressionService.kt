@@ -13,6 +13,9 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.notesapp.compressify.R
+import com.notesapp.compressify.data.repository.LibraryRepository
+import com.notesapp.compressify.domain.repository.LibraryRepositoryImpl
+import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
@@ -22,10 +25,10 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 class VideoCompressionService : Service() {
-
+    private val libraryRepository: LibraryRepository = LibraryRepositoryImpl()
     private val binder = VideoCompressionBinder()
-
-    private val compressAndSaveVideoUseCase = CompressAndSaveVideoUseCase()
+    private val addLibraryItemUseCase = AddLibraryItemUseCase(libraryRepository)
+    private val compressAndSaveVideoUseCase = CompressAndSaveVideoUseCase(addLibraryItemUseCase)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand: ")
         val videosToOptions = intent?.getParcelableArrayListExtra(

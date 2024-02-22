@@ -1,5 +1,6 @@
 package com.notesapp.compressify.domain.useCase
 
+import android.net.Uri
 import android.util.Log
 import com.abedelazizshe.lightcompressorlibrary.CompressionListener
 import com.abedelazizshe.lightcompressorlibrary.VideoCompressor
@@ -8,13 +9,18 @@ import com.abedelazizshe.lightcompressorlibrary.config.Configuration
 import com.abedelazizshe.lightcompressorlibrary.config.SaveLocation
 import com.abedelazizshe.lightcompressorlibrary.config.SharedStorageConfiguration
 import com.notesapp.compressify.CompressApplication
+import com.notesapp.compressify.domain.model.LibraryModel
+import com.notesapp.compressify.domain.model.MediaCategory
 import com.notesapp.compressify.service.VideoCompressionService
 import com.notesapp.compressify.util.getVideoHeight
 import com.notesapp.compressify.util.getVideoWidth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-class CompressAndSaveVideoUseCase @Inject constructor() :
+class CompressAndSaveVideoUseCase @Inject constructor(private val addLibraryItemUseCase: AddLibraryItemUseCase) :
     BaseUseCase<CompressAndSaveVideoUseCase.Params, Int>() {
     data class Params(
         val videosToOptions: List<VideoCompressionService.VideoCompressionModel>,
@@ -43,11 +49,13 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
         return parameters.videosToOptions.size
     }
 
-    private fun compressVideo(
+    private suspend fun compressVideo(
         compressionModel: VideoCompressionService.VideoCompressionModel,
         onProgress: (percent: Int) -> Unit = {},
         onComplete: () -> Unit = {}
     ) {
+        val originalToCompressedUri = mutableMapOf<Uri, Uri>()
+
         val (width, height) = compressionModel.run {
             (uri.getVideoWidth() * resolution) to (uri.getVideoHeight() * resolution)
         }
@@ -87,9 +95,28 @@ class CompressAndSaveVideoUseCase @Inject constructor() :
                 }
 
                 override fun onSuccess(index: Int, size: Long, path: String?) {
+                    saveVideoToLibrary(listOf(compressionModel.uri), listOf(Uri.parse(path)))
                     onComplete()
                 }
             }
         )
+//        saveVideoToLibrary(listOf(compressionModel.uri), listOf(compressionModel.uri))
     }
+
+
+
+    private  fun saveVideoToLibrary(uris : List<Uri>, compressedUris : List<Uri>) = CompressApplication.App.applicationScope.launch(Dispatchers.IO){
+        val libraryModels = uris.zip(compressedUris).map {(uri, compressedUri)->
+            LibraryModel(
+                id = UUID.randomUUID().toString(),
+                originalURI = uri,
+                compressedURI = compressedUri,
+                timeStamp = System.currentTimeMillis(),
+                category = MediaCategory.VIDEO
+            )
+        }
+        val parameters = AddLibraryItemUseCase.Parameters(libraryModels)
+        addLibraryItemUseCase.launch(parameters)
+    }
+
 }

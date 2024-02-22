@@ -123,21 +123,6 @@ class MainViewModel @Inject constructor(
                 }
             }.awaitAll()
             _selectedVideosProcessing.value = false
-            val libraryModels: MutableList<LibraryModel> = mutableListOf()
-            uris.forEach {
-                val libraryModel = LibraryModel(
-                    id = "",
-                    originalURI = it,
-                    compressedURI = null,
-                    timeStamp = 0,
-                    category = MediaCategory.VIDEO
-                )
-                libraryModels.add(libraryModel)
-            }
-
-
-            val parameters = AddLibraryItemUseCase.Parameters(libraryModels)
-            addLibraryItemUseCase.launch(parameters)
         }
 
     }

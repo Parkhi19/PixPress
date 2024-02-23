@@ -19,8 +19,14 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.notesapp.compressify.domain.model.VideoModel
 import androidx.compose.ui.Modifier
@@ -30,24 +36,31 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.abedelazizshe.lightcompressorlibrary.VideoQuality
 import com.notesapp.compressify.ui.components.home.common.CompressionOptionsSlider
+import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.createImageThumbnail
 import com.notesapp.compressify.util.createVideoThumbnail
 import com.notesapp.compressify.util.getFormattedSize
+import javax.annotation.meta.When
 
 @Composable
 fun IndividualVideoCompressedCard(
     modifier: Modifier = Modifier,
-    video : VideoModel,
-    compressionOptions : MainViewModel.VideoCompressionOptions,
+    video: VideoModel,
+    compressionOptions: MainViewModel.VideoCompressionOptions,
     onCompressionOptionsChanged: (MainViewModel.VideoCompressionOptions) -> Unit,
     onUIEvent: (UIEvent) -> Unit
-    
+
 ) {
     val (resolution, quality, deleteOriginal) = compressionOptions
+
+    val videoQualityLevels = listOf("Very Low", "Low", "Medium", "High", "Very High")
+    var videoQualitySliderPosition by remember { mutableStateOf(1f) }
+
     ElevatedCard(
         modifier = modifier,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
@@ -139,21 +152,50 @@ fun IndividualVideoCompressedCard(
                     }
                 )
 
-                CompressionOptionsSlider(
+                val textColor = MaterialTheme.colorScheme.onBackground
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    label = "Bitrate",
-                    labelValue = "${video.bitrate.times(quality).toInt()} kbps",
-                    value = quality,
-                    onValueChange = {
-                        onCompressionOptionsChanged(
-                            compressionOptions.copy(
-                                quality = it
-                            )
+                        .padding(vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = "Quality",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 8.dp),
+                            color = textColor
+                        )
+                        Text(
+                            text = when (videoQualitySliderPosition) {
+                                in 0.1f..0.25f -> videoQualityLevels[0]
+                                in 0.26f..0.49f -> videoQualityLevels[1]
+                                in 0.5f..0.75f -> videoQualityLevels[2]
+                                in 0.76f..0.9f-> videoQualityLevels[3]
+                                else -> videoQualityLevels[4]
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = textColor
                         )
                     }
-                )
+                    Slider(
+                        value = videoQualitySliderPosition,
+                        valueRange = 0.1f..1f,
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = primaryColor,
+                            thumbColor = primaryColor,
+                            inactiveTrackColor = primaryColor.copy(alpha = 0.7f)
+                        ),
+                        steps = 4,
+                        onValueChange = {
+                            videoQualitySliderPosition = it
+                        }
+                    )
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

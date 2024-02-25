@@ -24,6 +24,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,7 +60,7 @@ fun IndividualVideoCompressedCard(
     val (resolution, quality, deleteOriginal) = compressionOptions
 
     val videoQualityLevels = listOf("Very Low", "Low", "Medium", "High", "Very High")
-    var videoQualitySliderPosition by remember { mutableStateOf(1f) }
+    var videoQualitySliderPosition by remember { mutableFloatStateOf(4f) }
 
     ElevatedCard(
         modifier = modifier,
@@ -170,31 +171,26 @@ fun IndividualVideoCompressedCard(
                             color = textColor
                         )
                         Text(
-                            text = when (videoQualitySliderPosition) {
-                                in 0.1f..0.25f -> videoQualityLevels[0]
-                                in 0.26f..0.49f -> videoQualityLevels[1]
-                                in 0.5f..0.75f -> videoQualityLevels[2]
-                                in 0.76f..0.9f-> videoQualityLevels[3]
-                                else -> videoQualityLevels[4]
-                            },
+                            text = videoQualityLevels[videoQualitySliderPosition.toInt()],
                             style = MaterialTheme.typography.bodySmall,
                             color = textColor
                         )
                     }
                     Slider(
                         value = videoQualitySliderPosition,
-                        valueRange = 0.1f..1f,
+                        valueRange = 0f..4f,
                         colors = SliderDefaults.colors(
                             activeTrackColor = primaryColor,
                             thumbColor = primaryColor,
                             inactiveTrackColor = primaryColor.copy(alpha = 0.7f)
                         ),
-                        steps = 4,
+                        steps = 3,
                         onValueChange = {
                             videoQualitySliderPosition = it
                         }
                     )
                 }
+
 
                 Row(
                     modifier = Modifier

@@ -28,7 +28,7 @@ import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsFooter
 import com.notesapp.compressify.ui.components.home.common.CompressOptionsHeader
-import com.notesapp.compressify.ui.components.image.CompressionOptionsDialog
+import com.notesapp.compressify.ui.components.image.CompressionImageOptionsDialog
 import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import com.notesapp.compressify.util.UIEvent
@@ -40,11 +40,13 @@ fun CompressVideoOptionsScreen(
     onUIEvent: (UIEvent) -> Unit
 ) {
     var resolution by remember {
-        mutableFloatStateOf(MainViewModel.INITIAL_RESOLUTION)
+        mutableFloatStateOf(MainViewModel.INITIAL_IMAGE_RESOLUTION)
     }
+
     var quality by remember {
-        mutableFloatStateOf(MainViewModel.INITIAL_QUALITY)
+        mutableStateOf(MainViewModel.INITIAL_VIDEO_QUALITY)
     }
+
     var deleteOriginal by remember {
         mutableStateOf(false)
     }
@@ -109,7 +111,7 @@ fun CompressVideoOptionsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         if (showOptionsBottomSheet) {
-            CompressionOptionsDialog(
+            CompressionVideoOptionsDialog(
                 modifier = Modifier.fillMaxWidth(),
                 onDismiss = {
                     showOptionsBottomSheet = false

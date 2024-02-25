@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.Parcelable
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.abedelazizshe.lightcompressorlibrary.VideoQuality
 import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
@@ -96,7 +97,7 @@ class VideoCompressionService : Service() {
     data class VideoCompressionModel(
         val uri: Uri,
         val resolution: Float,
-        val quality: Float,
+        val quality: VideoQuality,
         val deleteOriginal: Boolean
     ) : Parcelable {
     }

@@ -57,7 +57,7 @@ internal fun CompressionVideoOptionsDialog(
     ModalBottomSheet(onDismissRequest = { onDismiss() }, sheetState = sheetState) {
         val textColor = MaterialTheme.colorScheme.onBackground
         var resolution by mutableFloatStateOf(initialResolution)
-        var quality by mutableStateOf(initialQuality)
+        val quality by mutableStateOf(initialQuality)
         var deleteOriginal by mutableStateOf(initialDeleteOriginal)
         Card(
             shape = RoundedCornerShape(

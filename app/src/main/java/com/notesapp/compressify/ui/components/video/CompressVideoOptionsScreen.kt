@@ -98,10 +98,12 @@ fun CompressVideoOptionsScreen(
                     showOptionsBottomSheet = true
                 },
                 onContinueClick = {
+                    onUIEvent(
                     UIEvent.Videos.VideoCompressionOptionsApplied(
                         resolution = resolution,
                         quality = quality,
                         deleteOriginal = deleteOriginal
+                    )
                     )
                     onUIEvent(UIEvent.Navigate(NavigationRoutes.INDIVIDUAL_VIDEO_PREVIEW))
                 }

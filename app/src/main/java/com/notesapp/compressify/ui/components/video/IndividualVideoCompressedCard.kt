@@ -60,7 +60,13 @@ fun IndividualVideoCompressedCard(
     val (resolution, quality, deleteOriginal) = compressionOptions
 
     val videoQualityLevels = listOf("Very Low", "Low", "Medium", "High", "Very High")
-    var videoQualitySliderPosition by remember { mutableFloatStateOf(4f) }
+    val videoQualitySliderToVideoQualityMap = listOf(
+        0f to VideoQuality.VERY_LOW,
+        1f to VideoQuality.LOW,
+        2f to VideoQuality.MEDIUM,
+        3F to VideoQuality.HIGH,
+        4f to VideoQuality.VERY_HIGH
+    )
 
     ElevatedCard(
         modifier = modifier,
@@ -171,13 +177,18 @@ fun IndividualVideoCompressedCard(
                             color = textColor
                         )
                         Text(
-                            text = videoQualityLevels[videoQualitySliderPosition.toInt()],
+                            text = videoQualityLevels[videoQualitySliderToVideoQualityMap.indexOfFirst {
+                                it.second == quality
+                            }],
                             style = MaterialTheme.typography.bodySmall,
                             color = textColor
                         )
                     }
                     Slider(
-                        value = videoQualitySliderPosition,
+                        value = videoQualitySliderToVideoQualityMap.first {
+                            it.second == quality
+                        }.first,
+
                         valueRange = 0f..4f,
                         colors = SliderDefaults.colors(
                             activeTrackColor = primaryColor,
@@ -185,8 +196,12 @@ fun IndividualVideoCompressedCard(
                             inactiveTrackColor = primaryColor.copy(alpha = 0.7f)
                         ),
                         steps = 3,
-                        onValueChange = {
-                            videoQualitySliderPosition = it
+                        onValueChange = {videoQuality->
+                            onCompressionOptionsChanged(
+                                compressionOptions.copy(
+                                    quality = videoQualitySliderToVideoQualityMap.first { it.first == videoQuality }.second
+                                )
+                            )
                         }
                     )
                 }

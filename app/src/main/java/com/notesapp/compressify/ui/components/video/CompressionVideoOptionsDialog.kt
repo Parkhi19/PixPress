@@ -51,14 +51,23 @@ internal fun CompressionVideoOptionsDialog(
     onConfirm: (Float, VideoQuality, Boolean) -> Unit
 ) {
     val videoQualityLevels = listOf("Very Low", "Low", "Medium", "High", "Very High")
-    var videoQualitySliderPosition by remember { mutableFloatStateOf(4f) }
+
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(onDismissRequest = { onDismiss() }, sheetState = sheetState) {
         val textColor = MaterialTheme.colorScheme.onBackground
         var resolution by mutableFloatStateOf(initialResolution)
-        val quality by mutableStateOf(initialQuality)
+        var quality by mutableStateOf(initialQuality)
         var deleteOriginal by mutableStateOf(initialDeleteOriginal)
+
+        val videoQualitySliderToVideoQualityMap = listOf(
+            0f to VideoQuality.VERY_LOW,
+            1f to VideoQuality.LOW,
+            2f to VideoQuality.MEDIUM,
+            3F to VideoQuality.HIGH,
+            4f to VideoQuality.VERY_HIGH
+        )
+
         Card(
             shape = RoundedCornerShape(
                 size = 8.dp
@@ -109,9 +118,6 @@ internal fun CompressionVideoOptionsDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-
-                val textColor = MaterialTheme.colorScheme.onBackground
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -129,13 +135,13 @@ internal fun CompressionVideoOptionsDialog(
                             color = textColor
                         )
                         Text(
-                            text = videoQualityLevels[videoQualitySliderPosition.toInt()],
+                            text = videoQualityLevels[videoQualitySliderToVideoQualityMap.indexOfFirst { it.second == quality }],
                             style = MaterialTheme.typography.bodySmall,
                             color = textColor
                         )
                     }
                     Slider(
-                        value = videoQualitySliderPosition,
+                        value = videoQualitySliderToVideoQualityMap.first { it.second == quality }.first,
                         valueRange = 0f..4f,
                         colors = SliderDefaults.colors(
                             activeTrackColor = primaryColor,
@@ -143,8 +149,8 @@ internal fun CompressionVideoOptionsDialog(
                             inactiveTrackColor = primaryColor.copy(alpha = 0.7f)
                         ),
                         steps = 3,
-                        onValueChange = {
-                            videoQualitySliderPosition = it
+                        onValueChange = {videoQuality->
+                            quality = videoQualitySliderToVideoQualityMap.first { it.first == videoQuality }.second
                         }
                     )
                 }
@@ -180,6 +186,7 @@ internal fun CompressionVideoOptionsDialog(
                             color = textColor
                         )
                     }
+
                     PrimaryButton(
                         onClick = {
                             onConfirm(resolution, quality, deleteOriginal)

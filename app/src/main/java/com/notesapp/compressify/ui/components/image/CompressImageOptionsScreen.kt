@@ -39,10 +39,10 @@ fun CompressImageOptionsScreen(
     onUIEvent: (UIEvent) -> Unit
 ) {
     var resolution by remember {
-        mutableFloatStateOf(MainViewModel.INITIAL_RESOLUTION)
+        mutableFloatStateOf(MainViewModel.INITIAL_IMAGE_RESOLUTION)
     }
     var quality by remember {
-        mutableFloatStateOf(MainViewModel.INITIAL_QUALITY)
+        mutableFloatStateOf(MainViewModel.INITIAL_IMAGE_QUALITY)
     }
     var deleteOriginal by remember {
         mutableStateOf(false)
@@ -113,7 +113,7 @@ fun CompressImageOptionsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         if (showOptionsBottomSheet) {
-            CompressionOptionsDialog(
+            CompressionImageOptionsDialog(
                 modifier = Modifier.fillMaxWidth(),
                 onDismiss = {
                     showOptionsBottomSheet = false

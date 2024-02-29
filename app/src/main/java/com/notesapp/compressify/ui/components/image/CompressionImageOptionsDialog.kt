@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CompressionOptionsDialog(
+internal fun CompressionImageOptionsDialog(
     modifier: Modifier,
     onDismiss: () -> Unit,
     initialResolution : Float,

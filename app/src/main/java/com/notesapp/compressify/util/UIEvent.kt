@@ -1,6 +1,7 @@
 package com.notesapp.compressify.util
 
 import android.net.Uri
+import com.abedelazizshe.lightcompressorlibrary.VideoQuality
 import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 
@@ -26,7 +27,7 @@ sealed interface UIEvent {
         data class RemoveVideoClicked(val path: String) : Videos
         data class VideoCompressionOptionsApplied(
             val resolution: Float,
-            val quality: Float,
+            val quality: VideoQuality,
             val deleteOriginal: Boolean
         ) : Videos
 

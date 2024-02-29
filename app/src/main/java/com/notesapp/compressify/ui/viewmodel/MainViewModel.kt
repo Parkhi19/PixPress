@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.abedelazizshe.lightcompressorlibrary.VideoQuality
 import com.notesapp.compressify.CompressApplication
 import com.notesapp.compressify.domain.model.CategoryModel
 import com.notesapp.compressify.domain.model.Event
@@ -67,7 +68,9 @@ class MainViewModel @Inject constructor(
 
     private val _allImageCompressOptions = MutableStateFlow(ImageCompressionOptions())
     val allImageCompressOptions = _allImageCompressOptions.asStateFlow()
-    val allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
+
+    private val _allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
+    val allVideoCompressOptions = _allVideoCompressOptions.asStateFlow()
 
 
     val compressImagesUIState = combine(
@@ -150,12 +153,24 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun onContinueOptionClick(
+    private fun onContinueImageOptionClick(
         resolution: Float,
         quality: Float,
         deleteOriginal: Boolean
     ) {
         _allImageCompressOptions.value = ImageCompressionOptions(
+            resolution = resolution,
+            quality = quality,
+            deleteOriginal = deleteOriginal
+        )
+    }
+
+    private fun onContinueVideoOptionClick(
+        resolution: Float,
+        quality: VideoQuality,
+        deleteOriginal: Boolean
+    ) {
+        _allVideoCompressOptions.value = VideoCompressionOptions(
             resolution = resolution,
             quality = quality,
             deleteOriginal = deleteOriginal
@@ -206,7 +221,7 @@ class MainViewModel @Inject constructor(
             }
 
             is UIEvent.Images.ImageCompressionOptionsApplied -> {
-                onContinueOptionClick(
+                onContinueImageOptionClick(
                     event.resolution,
                     event.quality,
                     event.deleteOriginal
@@ -231,7 +246,13 @@ class MainViewModel @Inject constructor(
                 }
             }
 
-            is UIEvent.Videos.VideoCompressionOptionsApplied -> TODO()
+            is UIEvent.Videos.VideoCompressionOptionsApplied -> {
+                onContinueVideoOptionClick(
+                    event.resolution,
+                    event.quality,
+                    event.deleteOriginal
+                )
+            }
             is UIEvent.Images.OnStartCompressionClick -> {
                 sendEvent(Event.PopBackStackTo(NavigationRoutes.HOME))
                 sendEvent(Event.ShowToast("Images are being compressed"))
@@ -254,19 +275,22 @@ class MainViewModel @Inject constructor(
     }
 
     companion object {
-        const val INITIAL_RESOLUTION = 0.9f
-        const val INITIAL_QUALITY = 0.9f
+        const val INITIAL_IMAGE_RESOLUTION = 1f
+        const val INITIAL_IMAGE_QUALITY = 0.9f
+        const val INITIAL_VIDEO_RESOLUTION = 1f
+        val INITIAL_VIDEO_QUALITY = VideoQuality.HIGH
     }
 
+
     data class ImageCompressionOptions(
-        val resolution: Float = INITIAL_RESOLUTION,
-        val quality: Float = INITIAL_QUALITY,
+        val resolution: Float = INITIAL_IMAGE_RESOLUTION,
+        val quality: Float = INITIAL_IMAGE_QUALITY,
         val deleteOriginal: Boolean = false
     )
 
     data class VideoCompressionOptions(
-        val resolution: Float = INITIAL_RESOLUTION,
-        val quality: Float = INITIAL_QUALITY,
+        val resolution: Float = INITIAL_VIDEO_RESOLUTION,
+        val quality: VideoQuality = INITIAL_VIDEO_QUALITY,
         val deleteOriginal: Boolean = false
     )
 }

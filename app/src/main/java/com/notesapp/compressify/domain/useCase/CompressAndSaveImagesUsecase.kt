@@ -101,7 +101,9 @@ class CompressAndSaveImagesUseCase @Inject constructor(
         )
         outputStream.flush()
         outputStream.close()
-        saveImageToLibrary(listOf(compressionModel.uri), listOf(resultFile.toUri()))
+        if (!compressionModel.deleteOriginal){
+            saveImageToLibrary(listOf(compressionModel.uri), listOf(resultFile.toUri()))
+        }
 
         return resultFile.toUri()
     }

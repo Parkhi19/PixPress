@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Checkbox
@@ -28,6 +29,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.R
+import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
@@ -35,7 +38,8 @@ import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
-    initialAllItemsSelected: Boolean
+    initialAllItemsSelected: Boolean,
+    notDeletedImages : List<LibraryModel>
 ) {
     val horizontalPagerState = rememberPagerState(pageCount = { 2 })
     val allItemsSelected by remember { mutableStateOf(initialAllItemsSelected) }
@@ -94,7 +98,24 @@ fun LibraryScreen(
                 text = "All items",
                 modifier = Modifier.padding(8.dp)
             )
-            Checkbox(checked = allItemsSelected , onCheckedChange = {} )
+            Checkbox(checked = allItemsSelected , onCheckedChange = {})
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(10) {
+                notDeletedImages[it].originalURI?.let { originalUri ->
+                    IndividualLibraryScreenCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        image = originalUri
+                    )
+                }
+            }
         }
     }
 }

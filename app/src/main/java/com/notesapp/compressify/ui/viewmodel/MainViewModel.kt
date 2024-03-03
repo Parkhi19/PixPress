@@ -72,6 +72,9 @@ class MainViewModel @Inject constructor(
     private val _allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
     val allVideoCompressOptions = _allVideoCompressOptions.asStateFlow()
 
+    private val _notDeletedImages = MutableStateFlow<List<LibraryModel>>(emptyList())
+    val notDeletedImages = _notDeletedImages.asStateFlow()
+
 
     val compressImagesUIState = combine(
         selectedImages,
@@ -147,6 +150,12 @@ class MainViewModel @Inject constructor(
 
     }
 
+    private suspend fun getNotDeletedImages(){
+      _notDeletedImages.value =  compressAndSaveImagesUseCase.getImagesFromLibrary().filter {
+            it.category == MediaCategory.IMAGE
+        }
+    }
+
     fun syncStorageCategory() {
         viewModelScope.launch {
             _categoryStorage.value = getCategoryStorageUseCase.launch(BaseUseCase.Parameters())
@@ -199,18 +208,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-//    private fun onVideoCompressionOptionsConfirm(
-//    ) {
-//        viewModelScope.launch {
-//            compressAndSaveVideosUseCase.launch(
-//                CompressAndSaveVideoUseCase.Params(
-//                    uris = selectedVideos.value.map {
-//                        it.uri
-//                    }
-//                )
-//            )
-//        }
-//    }
 
     fun onUIEvent(event: UIEvent) {
         when (event) {

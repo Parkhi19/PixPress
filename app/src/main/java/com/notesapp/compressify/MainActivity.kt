@@ -35,6 +35,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.notesapp.compressify.domain.model.Event
 import com.notesapp.compressify.domain.model.NavigationRoutes
+import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
+import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
+import com.notesapp.compressify.domain.useCase.GetLibraryItemsUseCase
 import com.notesapp.compressify.ui.components.home.HomeScreen
 import com.notesapp.compressify.ui.components.home.common.GrantStoragePermission
 import com.notesapp.compressify.ui.components.image.CompressImageOptionsScreen
@@ -45,9 +48,11 @@ import com.notesapp.compressify.ui.library.LibraryScreen
 import com.notesapp.compressify.ui.theme.CompressifyTheme
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @AndroidEntryPoint
@@ -133,7 +138,10 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val imageCompressionOptions by viewModel.allImageCompressOptions.collectAsState()
                 val videoCompressionOptions by viewModel.allVideoCompressOptions.collectAsState()
 
-                if(storagePermissionsGranted){
+                val notDeletedImages by viewModel.notDeletedImages.collectAsState()
+
+
+                if (storagePermissionsGranted) {
                     checkForNotificationPermissions()
                 }
 
@@ -189,7 +197,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
 
                             composable(NavigationRoutes.COMPRESS_VIDEO.name) {
                                 CompressVideoOptionsScreen(
-                                   compressVideosUIState = compressVideosUIState,
+                                    compressVideosUIState = compressVideosUIState,
                                     modifier = Modifier.fillMaxSize(),
                                     onUIEvent = viewModel::onUIEvent
                                 )
@@ -215,8 +223,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             composable(NavigationRoutes.LIBRARY.name) {
                                 LibraryScreen(
                                     modifier = Modifier.fillMaxSize(),
-                                    initialAllItemsSelected = false
-
+                                    initialAllItemsSelected = false,
+                                    notDeletedImages = notDeletedImages
                                 )
                             }
 
@@ -300,7 +308,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
         return true
     }
 
-    private fun checkForNotificationPermissions(){
+    private fun checkForNotificationPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)

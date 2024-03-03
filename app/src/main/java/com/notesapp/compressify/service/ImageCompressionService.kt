@@ -19,6 +19,7 @@ import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.domain.repository.LibraryRepositoryImpl
 import com.notesapp.compressify.domain.useCase.AddLibraryItemUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
+import com.notesapp.compressify.domain.useCase.GetLibraryItemsUseCase
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +34,8 @@ class ImageCompressionService : Service() {
 
     private val binder = ImageCompressionBinder()
     private val addLibraryItemUseCase = AddLibraryItemUseCase(libraryRepository)
-    private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase(addLibraryItemUseCase)
+    private val getLibraryItemsUseCase = GetLibraryItemsUseCase(libraryRepository)
+    private val compressAndSaveImagesUseCase = CompressAndSaveImagesUseCase(addLibraryItemUseCase, getLibraryItemsUseCase)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val imagesToOptions = intent?.getParcelableArrayListExtra(
             IMAGE_TO_OPTIONS

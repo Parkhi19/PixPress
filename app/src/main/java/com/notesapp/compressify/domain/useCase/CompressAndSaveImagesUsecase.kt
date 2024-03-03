@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.notesapp.compressify.data.repository.LibraryRepository
 import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.domain.model.MediaCategory
 import com.notesapp.compressify.service.ImageCompressionService
@@ -19,7 +20,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 class CompressAndSaveImagesUseCase @Inject constructor(
-    private val addLibraryItemUseCase: AddLibraryItemUseCase
+    private val addLibraryItemUseCase: AddLibraryItemUseCase,
+    private val getLibraryItemsUseCase: GetLibraryItemsUseCase,
 ) :
     BaseUseCase<CompressAndSaveImagesUseCase.Params, Int>() {
     data class Params(
@@ -73,6 +75,10 @@ class CompressAndSaveImagesUseCase @Inject constructor(
        addLibraryItemUseCase.launch(parameters)
     }
 
+     suspend fun getImagesFromLibrary() : List<LibraryModel>{
+       return getLibraryItemsUseCase.launch(Parameters())
+    }
+
     private suspend fun compressImage(compressionModel: ImageCompressionService.ImageCompressionModel): Uri {
         val originalExtension = compressionModel.uri.toFile().extension
 
@@ -101,9 +107,9 @@ class CompressAndSaveImagesUseCase @Inject constructor(
         )
         outputStream.flush()
         outputStream.close()
-        if (!compressionModel.deleteOriginal){
+
             saveImageToLibrary(listOf(compressionModel.uri), listOf(resultFile.toUri()))
-        }
+
 
         return resultFile.toUri()
     }

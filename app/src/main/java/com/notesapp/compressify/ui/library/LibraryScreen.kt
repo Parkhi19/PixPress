@@ -1,5 +1,6 @@
 package com.notesapp.compressify.ui.library
 
+import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +33,7 @@ import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.ui.theme.primaryTintedColor
+import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -102,11 +104,10 @@ fun LibraryScreen(
         }
         
         Spacer(modifier = Modifier.height(16.dp))
-        
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(10) {
+            items(notDeletedImages.size) {
                 notDeletedImages[it].originalURI?.let { originalUri ->
                     IndividualLibraryScreenCard(
                         modifier = Modifier

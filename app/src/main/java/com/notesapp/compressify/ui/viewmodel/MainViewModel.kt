@@ -19,6 +19,7 @@ import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.domain.useCase.DeleteFilesUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
+import com.notesapp.compressify.domain.useCase.GetLibraryItemsUseCase
 import com.notesapp.compressify.service.ImageCompressionService
 import com.notesapp.compressify.service.VideoCompressionService
 import com.notesapp.compressify.ui.components.image.CompressImagesUIState
@@ -34,7 +35,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -46,9 +50,9 @@ class MainViewModel @Inject constructor(
     private val compressAndSaveVideosUseCase: CompressAndSaveVideoUseCase,
     private val getCategoryStorageUseCase: GetCategoryStorageUseCase,
     private val addLibraryItemUseCase: AddLibraryItemUseCase,
-    private val deleteFilesUseCase: DeleteFilesUseCase
+    private val deleteFilesUseCase: DeleteFilesUseCase,
+    private val getLibraryItemsUseCase: GetLibraryItemsUseCase
 ) : ViewModel() {
-
     private val _categoryStorage = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categoryStorage = _categoryStorage.asStateFlow()
 
@@ -72,8 +76,13 @@ class MainViewModel @Inject constructor(
     private val _allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
     val allVideoCompressOptions = _allVideoCompressOptions.asStateFlow()
 
-    private val _notDeletedImages = MutableStateFlow<List<LibraryModel>>(emptyList())
-    val notDeletedImages = _notDeletedImages.asStateFlow()
+    private val _notDeletedItems = getLibraryItemsUseCase.launchWithFlow(BaseUseCase.Parameters())
+
+    val notDeletedImages = _notDeletedItems.map { libraryModels ->
+        libraryModels.filter {
+            it.category == MediaCategory.IMAGE
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
 
     val compressImagesUIState = combine(
@@ -148,12 +157,6 @@ class MainViewModel @Inject constructor(
             _selectedImagesProcessing.value = false
         }
 
-    }
-
-    private suspend fun getNotDeletedImages(){
-      _notDeletedImages.value =  compressAndSaveImagesUseCase.getImagesFromLibrary().filter {
-            it.category == MediaCategory.IMAGE
-        }
     }
 
     fun syncStorageCategory() {
@@ -250,6 +253,7 @@ class MainViewModel @Inject constructor(
                     event.deleteOriginal
                 )
             }
+
             is UIEvent.Images.OnStartCompressionClick -> {
                 sendEvent(Event.PopBackStackTo(NavigationRoutes.HOME))
                 sendEvent(Event.ShowToast("Images are being compressed"))

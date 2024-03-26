@@ -35,6 +35,7 @@ import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.ui.viewmodel.MainViewModel
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -109,12 +110,17 @@ fun LibraryScreen(
         ) {
             items(notDeletedImages.size) {
                 notDeletedImages[it].originalURI?.let { originalUri ->
-                    IndividualLibraryScreenCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        image = originalUri
-                    )
+                    if(File(originalUri.path).exists()){
+                        IndividualLibraryScreenCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            image = originalUri
+                        )
+                    }
+                    else{
+                        Text(text ="Image not found")
+                    }
                 }
             }
         }

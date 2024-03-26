@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
@@ -35,12 +36,13 @@ fun IndividualLibraryScreenCard(
             ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
                 val (detailsRef, imageRef, selectedImage) = createRefs()
                 Image(
-                    bitmap = image.createImageThumbnail(5).asImageBitmap(),
+                    bitmap = image.createImageThumbnail(20).asImageBitmap(),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth(0.4f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(0.4f)
+                        .padding(8.dp)
                         .constrainAs(imageRef) {
                             top.linkTo(parent.top)
                             start.linkTo(parent.start)

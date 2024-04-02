@@ -1,51 +1,53 @@
 package com.notesapp.compressify.ui.library
 
-import androidx.activity.viewModels
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.notesapp.compressify.R
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.ui.theme.primaryTintedColor
-import com.notesapp.compressify.ui.viewmodel.MainViewModel
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import com.notesapp.compressify.util.UIEvent
 import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
-    initialAllItemsSelected: Boolean,
-    notDeletedImages : List<LibraryModel>
+    notDeletedImages : List<LibraryModel>,
+    onUIEvent: (UIEvent) -> Unit
 ) {
     val horizontalPagerState = rememberPagerState(pageCount = { 2 })
-    val allItemsSelected by remember { mutableStateOf(initialAllItemsSelected) }
+    val selectedItems =  remember {
+        mutableStateListOf<Uri>()
+    }
+    val allItemsSelected by remember {
+        derivedStateOf {
+            notDeletedImages.all {
+                selectedItems.contains(it.originalURI)
+            }
+        }
+    }
     Column(
         modifier = modifier
     ) {
@@ -101,13 +103,18 @@ fun LibraryScreen(
                 text = "All items",
                 modifier = Modifier.padding(8.dp)
             )
-            Checkbox(checked = allItemsSelected , onCheckedChange = {})
+            Checkbox(checked = allItemsSelected , onCheckedChange = {
+                selectedItems.clear()
+                if(it) {
+                    selectedItems.addAll(notDeletedImages.mapNotNull {
+                        it.originalURI
+                    })
+                }
+            })
         }
         
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
             items(notDeletedImages.size) {
                 notDeletedImages[it].originalURI?.let { originalUri ->
                     if(File(originalUri.path).exists()){
@@ -115,7 +122,15 @@ fun LibraryScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
-                            image = originalUri
+                            image = ImageModel(originalUri),
+                            isImageSelected = selectedItems.contains(originalUri),
+                            onCheckChange = {
+                                if (it) {
+                                    selectedItems.add(originalUri)
+                                } else {
+                                    selectedItems.remove(originalUri)
+                                }
+                            }
                         )
                     }
                     else{

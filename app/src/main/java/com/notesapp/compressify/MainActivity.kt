@@ -223,8 +223,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             composable(NavigationRoutes.LIBRARY.name) {
                                 LibraryScreen(
                                     modifier = Modifier.fillMaxSize(),
-                                    initialAllItemsSelected = false,
-                                    notDeletedImages = notDeletedImages
+                                    notDeletedImages = notDeletedImages,
+                                    onUIEvent = viewModel::onUIEvent
                                 )
                             }
 

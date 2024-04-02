@@ -1,66 +1,77 @@
 package com.notesapp.compressify.ui.library
 
-import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.notesapp.compressify.domain.model.ImageModel
-import com.notesapp.compressify.util.createImageThumbnail
+import com.notesapp.compressify.ui.theme.primaryTintedColor
+import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
 fun IndividualLibraryScreenCard(
     modifier: Modifier = Modifier,
-    image: Uri
+    image: ImageModel,
+    isImageSelected: Boolean,
+    onCheckChange: (Boolean) -> Unit
 ) {
-    ElevatedCard(
+    Card(
         modifier = modifier,
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(width = 1.dp, color = primaryTintedColor)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-                val (detailsRef, imageRef, selectedImage) = createRefs()
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+            ) {
                 Image(
-                    bitmap = image.createImageThumbnail(20).asImageBitmap(),
+                    bitmap = image.thumbnail.asImageBitmap(),
                     contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth(0.4f)
-                        .fillMaxHeight(0.4f)
-                        .padding(8.dp)
-                        .constrainAs(imageRef) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
-              Checkbox(
-                  modifier = Modifier
-                      .fillMaxWidth()
-                      .fillMaxHeight()
-                      .constrainAs(selectedImage) {
-                          top.linkTo(parent.top)
-                          bottom.linkTo(parent.bottom)
-                          end.linkTo(parent.end)
-                      },
-                  checked = false,
-                  onCheckedChange ={}
-              )
+            }
+            Row(
+                modifier = Modifier
+                    .background(primaryTintedColor)
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 0.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(8f)) {
+                    Text(
+                        text = image.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = image.size.getFormattedSize(),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+               Checkbox(checked = isImageSelected , onCheckedChange = onCheckChange )
             }
         }
     }

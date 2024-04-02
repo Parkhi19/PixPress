@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -76,7 +77,11 @@ class MainViewModel @Inject constructor(
     private val _allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
     val allVideoCompressOptions = _allVideoCompressOptions.asStateFlow()
 
-    private val _notDeletedItems = getLibraryItemsUseCase.launchWithFlow(BaseUseCase.Parameters())
+    private val _notDeletedItems = getLibraryItemsUseCase.launchWithFlow(BaseUseCase.Parameters()).map { models ->
+        models.filter {
+            it.originalURI?.path?.let { uri -> File(uri).exists() } == true
+        }
+    }
 
     val notDeletedImages = _notDeletedItems.map { libraryModels ->
         libraryModels.filter {

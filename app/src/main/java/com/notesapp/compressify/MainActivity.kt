@@ -141,6 +141,8 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val notDeletedImages by viewModel.notDeletedImages.collectAsState()
 
 
+
+
                 if (storagePermissionsGranted) {
                     checkForNotificationPermissions()
                 }

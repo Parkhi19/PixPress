@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.LibraryModel
+import com.notesapp.compressify.domain.model.NavigationRoutes
+import com.notesapp.compressify.ui.components.home.common.PrimaryButtonOutlined
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.UIEvent
 import java.io.File
@@ -34,11 +37,11 @@ import java.io.File
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
-    notDeletedImages : List<LibraryModel>,
+    notDeletedImages: List<LibraryModel>,
     onUIEvent: (UIEvent) -> Unit
 ) {
     val horizontalPagerState = rememberPagerState(pageCount = { 2 })
-    val selectedItems =  remember {
+    val selectedItems = remember {
         mutableStateListOf<Uri>()
     }
     val allItemsSelected by remember {
@@ -48,6 +51,7 @@ fun LibraryScreen(
             }
         }
     }
+
     Column(
         modifier = modifier
     ) {
@@ -97,27 +101,27 @@ fun LibraryScreen(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "All items",
                 modifier = Modifier.padding(8.dp)
             )
-            Checkbox(checked = allItemsSelected , onCheckedChange = {
+            Checkbox(checked = allItemsSelected, onCheckedChange = {
                 selectedItems.clear()
-                if(it) {
+                if (it) {
                     selectedItems.addAll(notDeletedImages.mapNotNull {
                         it.originalURI
                     })
                 }
             })
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
             items(notDeletedImages.size) {
                 notDeletedImages[it].originalURI?.let { originalUri ->
-                    if(File(originalUri.path).exists()){
+                    if (File(originalUri.path).exists()) {
                         IndividualLibraryScreenCard(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -132,13 +136,19 @@ fun LibraryScreen(
                                 }
                             }
                         )
-                    }
-                    else{
-                        Text(text ="Image not found")
+                    } else {
+                        Text(text = "Image not found")
                     }
                 }
             }
         }
+        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Delete",  onClick = {
+            onUIEvent(
+                UIEvent.Images.OnDeleteSelectedImagesClick(
+                    selectedItems
+                )
+            )
+        })
     }
 }
 

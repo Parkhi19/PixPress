@@ -18,6 +18,7 @@ import com.notesapp.compressify.domain.useCase.BaseUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveImagesUseCase
 import com.notesapp.compressify.domain.useCase.CompressAndSaveVideoUseCase
 import com.notesapp.compressify.domain.useCase.DeleteFilesUseCase
+import com.notesapp.compressify.domain.useCase.DeleteLibraryItemsUseCase
 import com.notesapp.compressify.domain.useCase.GetCategoryStorageUseCase
 import com.notesapp.compressify.domain.useCase.GetLibraryItemsUseCase
 import com.notesapp.compressify.service.ImageCompressionService
@@ -28,6 +29,7 @@ import com.notesapp.compressify.util.UIEvent
 import com.notesapp.compressify.util.getAbsoluteImagePath
 import com.notesapp.compressify.util.getAbsoluteVideoPath
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.realm.kotlin.Realm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -52,8 +54,11 @@ class MainViewModel @Inject constructor(
     private val getCategoryStorageUseCase: GetCategoryStorageUseCase,
     private val addLibraryItemUseCase: AddLibraryItemUseCase,
     private val deleteFilesUseCase: DeleteFilesUseCase,
-    private val getLibraryItemsUseCase: GetLibraryItemsUseCase
+    private val getLibraryItemsUseCase: GetLibraryItemsUseCase,
+    private val deleteLibraryItemsUseCase: DeleteLibraryItemsUseCase
 ) : ViewModel() {
+
+
     private val _categoryStorage = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categoryStorage = _categoryStorage.asStateFlow()
 
@@ -77,11 +82,13 @@ class MainViewModel @Inject constructor(
     private val _allVideoCompressOptions = MutableStateFlow(VideoCompressionOptions())
     val allVideoCompressOptions = _allVideoCompressOptions.asStateFlow()
 
-    private val _notDeletedItems = getLibraryItemsUseCase.launchWithFlow(BaseUseCase.Parameters()).map { models ->
-        models.filter {
-            it.originalURI?.path?.let { uri -> File(uri).exists() } == true
+
+    private val _notDeletedItems =
+        getLibraryItemsUseCase.launchWithFlow(BaseUseCase.Parameters()).map { models ->
+            models.filter {
+                it.originalURI?.path?.let { uri -> File(uri).exists() } == true
+            }
         }
-    }
 
     val notDeletedImages = _notDeletedItems.map { libraryModels ->
         libraryModels.filter {
@@ -126,7 +133,6 @@ class MainViewModel @Inject constructor(
                 }
             }.awaitAll()
             _selectedImagesProcessing.value = false
-
         }
 
     }
@@ -147,10 +153,20 @@ class MainViewModel @Inject constructor(
 
     }
 
+    fun deleteSelectedImages(
+        toDeleteImage: List<Uri>
+    ) {
+        viewModelScope.launch {
+            deleteLibraryItemsUseCase.launch(
+                DeleteLibraryItemsUseCase.Parameters(toDeleteImage)
+            )
+        }
+    }
+
     private fun onImageAdded(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
             _selectedImagesProcessing.value = true
-            _selectedImages.value = _selectedImages.value + uris.mapNotNull {
+            _selectedImages.value += uris.mapNotNull {
                 it.getAbsoluteImagePath()
             }.filter { uri ->
                 _selectedImages.value.none { it.uri.path == uri.path }
@@ -161,7 +177,6 @@ class MainViewModel @Inject constructor(
             }.awaitAll()
             _selectedImagesProcessing.value = false
         }
-
     }
 
     fun syncStorageCategory() {
@@ -269,6 +284,10 @@ class MainViewModel @Inject constructor(
                 sendEvent(Event.PopBackStackTo(NavigationRoutes.HOME))
                 sendEvent(Event.ShowToast("Videos are being compressed"))
                 startVideoCompression(event.videosToOptions)
+            }
+
+            is UIEvent.Images.OnDeleteSelectedImagesClick -> {
+                deleteSelectedImages(event.toDeleteImages)
             }
         }
     }

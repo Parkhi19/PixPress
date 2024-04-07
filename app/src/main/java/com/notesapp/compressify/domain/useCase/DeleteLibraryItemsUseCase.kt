@@ -1,5 +1,6 @@
 package com.notesapp.compressify.domain.useCase
 
+import android.net.Uri
 import com.notesapp.compressify.data.repository.LibraryRepository
 import javax.inject.Inject
 
@@ -8,10 +9,10 @@ class DeleteLibraryItemsUseCase @Inject constructor(
 ) : BaseUseCase<DeleteLibraryItemsUseCase.Parameters, Unit>() {
 
     data class Parameters(
-        val ids: List<String>
+        val uris : List<Uri>
     ) : BaseUseCase.Parameters()
 
     override suspend fun launch(parameters: Parameters) {
-        libraryRepository.deleteLibraryItems(parameters.ids)
+        libraryRepository.deleteLibraryItems(parameters.uris)
     }
 }

@@ -132,7 +132,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Chaqopy", onClick = {
+        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Go to Library", onClick = {
             onUIEvent(UIEvent.Navigate(NavigationRoutes.LIBRARY))
         })
 

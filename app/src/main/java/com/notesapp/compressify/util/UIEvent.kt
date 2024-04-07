@@ -21,6 +21,8 @@ sealed interface UIEvent {
             val imagesToOptions : List<Pair<Uri, MainViewModel.ImageCompressionOptions>>
         ): Images
 
+        data class OnDeleteSelectedImagesClick(val toDeleteImages : List<Uri>):Images
+
     }
 
     sealed interface Videos : UIEvent{

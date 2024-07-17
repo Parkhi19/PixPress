@@ -41,7 +41,7 @@ fun HomeScreen(
     categories: List<CategoryModel>,
     onCompressImageClick: () -> Unit,
     onCompressVideoClick: () -> Unit,
-    onLibraryButtonClick : ()-> Unit,
+    onLibraryButtonClick: () -> Unit,
     onUIEvent: (UIEvent) -> Unit
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -132,15 +132,16 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Go to Library", onClick = {
-            onUIEvent(UIEvent.Navigate(NavigationRoutes.LIBRARY))
-        })
-
-        }
-
+        PrimaryButtonOutlined(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            buttonText = "Go to Library",
+            onClick = {
+                onUIEvent(UIEvent.Navigate(NavigationRoutes.LIBRARY))
+            })
     }
-
-
+}
 
 @Composable
 fun CompressOptionItem(

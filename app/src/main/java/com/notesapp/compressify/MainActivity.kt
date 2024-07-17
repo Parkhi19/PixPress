@@ -265,7 +265,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
         arguments: Bundle?
     ) {
         destination.route?.let {
-            controller.popBackStack(it, false)
+            controller.popBackStack(it, false, true)
         }
     }
 

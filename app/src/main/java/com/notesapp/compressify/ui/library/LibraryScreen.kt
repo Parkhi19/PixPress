@@ -3,7 +3,9 @@ package com.notesapp.compressify.ui.library
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,18 +21,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.LibraryModel
-import com.notesapp.compressify.domain.model.NavigationRoutes
 import com.notesapp.compressify.ui.components.home.common.PrimaryButtonOutlined
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.UIEvent
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -40,17 +43,8 @@ fun LibraryScreen(
     notDeletedImages: List<LibraryModel>,
     onUIEvent: (UIEvent) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val horizontalPagerState = rememberPagerState(pageCount = { 2 })
-    val selectedItems = remember {
-        mutableStateListOf<Uri>()
-    }
-    val allItemsSelected by remember {
-        derivedStateOf {
-            notDeletedImages.all {
-                selectedItems.contains(it.originalURI)
-            }
-        }
-    }
 
     Column(
         modifier = modifier
@@ -65,7 +59,29 @@ fun LibraryScreen(
                 textAlign = TextAlign.Center
             )
         }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box (modifier = Modifier.weight(1f).clickable {
+                coroutineScope.launch {
+                    horizontalPagerState.animateScrollToPage(0)
+                }
+            }, contentAlignment = Alignment.Center){
+                Text(
+                    text = "Images",
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
+            Box (modifier = Modifier.weight(1f).clickable {
+                coroutineScope.launch {
+                    horizontalPagerState.animateScrollToPage(1)
+                }
+            }, contentAlignment = Alignment.Center){
+                Text(
+                    text = "Videos",
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
 
+        }
         HorizontalPager(
             horizontalPagerState,
             modifier = Modifier
@@ -73,12 +89,12 @@ fun LibraryScreen(
         ) {
             when (it) {
                 0 -> {
-                    Text(
-                        text = "Images",
+                    ImageLibraryScreen(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
-                        textAlign = TextAlign.Center
+                            .padding(horizontal = 16.dp),
+                        notDeletedImages = notDeletedImages,
+                        onUIEvent = onUIEvent
                     )
                 }
 
@@ -86,7 +102,6 @@ fun LibraryScreen(
                     Text(
                         text = "Videos",
                         modifier = Modifier
-                            .padding(8.dp)
                             .fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
@@ -99,56 +114,7 @@ fun LibraryScreen(
                 .fillMaxWidth()
                 .background(color = primaryTintedColor)
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "All items",
-                modifier = Modifier.padding(8.dp)
-            )
-            Checkbox(checked = allItemsSelected, onCheckedChange = {
-                selectedItems.clear()
-                if (it) {
-                    selectedItems.addAll(notDeletedImages.mapNotNull {
-                        it.originalURI
-                    })
-                }
-            })
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
-            items(notDeletedImages.size) {
-                notDeletedImages[it].originalURI?.let { originalUri ->
-                    if (File(originalUri.path).exists()) {
-                        IndividualLibraryScreenCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            image = ImageModel(originalUri),
-                            isImageSelected = selectedItems.contains(originalUri),
-                            onCheckChange = {
-                                if (it) {
-                                    selectedItems.add(originalUri)
-                                } else {
-                                    selectedItems.remove(originalUri)
-                                }
-                            }
-                        )
-                    } else {
-                        Text(text = "Image not found")
-                    }
-                }
-            }
-        }
-        PrimaryButtonOutlined(modifier = Modifier.padding(24.dp).fillMaxWidth(), buttonText = "Delete",  onClick = {
-            onUIEvent(
-                UIEvent.Images.OnDeleteSelectedImagesClick(
-                    selectedItems
-                )
-            )
-        })
     }
 }
+
 

@@ -46,7 +46,7 @@ class LibraryRepositoryImpl @Inject constructor() : LibraryRepository {
             val uriStrings = uris.map {
                 it.toString()
             }
-            val toDelete = realm.query(LibraryEntity::class, "originalURI in $0", uriStrings).find()
+            val toDelete = query(LibraryEntity::class, "originalURI in $0", uriStrings).find()
             delete(toDelete)
         }
     }

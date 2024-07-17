@@ -134,7 +134,6 @@ class MainViewModel @Inject constructor(
             }.awaitAll()
             _selectedImagesProcessing.value = false
         }
-
     }
 
     fun onVideoSelected(uris: List<Uri>) {

@@ -19,25 +19,24 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.LibraryModel
+import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.ui.components.home.common.PrimaryButtonOutlined
 import com.notesapp.compressify.util.UIEvent
 import java.io.File
 
 @Composable
-fun ImageLibraryScreen(
+fun VideoLibraryScreen(
     modifier: Modifier = Modifier,
-    notDeletedImages: List<LibraryModel>,
+    notDeletedVideos: List<LibraryModel>,
     onUIEvent: (UIEvent) -> Unit
 ) {
-
     val selectedItems = remember {
         mutableStateListOf<String>()
     }
     val allItemsSelected by remember {
         derivedStateOf {
-            notDeletedImages.isNotEmpty() && notDeletedImages.all {
+            notDeletedVideos.isNotEmpty() && notDeletedVideos.all {
                 selectedItems.contains(it.originalURI.toString())
             }
         }
@@ -56,7 +55,7 @@ fun ImageLibraryScreen(
                 onCheckedChange = {
                     selectedItems.clear()
                     if (it) {
-                        selectedItems.addAll(notDeletedImages.mapNotNull {
+                        selectedItems.addAll(notDeletedVideos.mapNotNull {
                             it.originalURI.toString()
                         })
                     }
@@ -65,15 +64,14 @@ fun ImageLibraryScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f)) {
-            items(notDeletedImages.size) {
-                notDeletedImages[it].originalURI?.let { originalUri ->
+            items(notDeletedVideos.size) {
+                notDeletedVideos[it].originalURI?.let { originalUri ->
                     if (File(originalUri.path).exists()) {
-                        IndividualLibraryImageScreenCard(
+                        IndividualLibraryVideoScreenCard(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            image = ImageModel(originalUri),
-                            isImageSelected = selectedItems.contains(originalUri.toString()),
+                                .fillMaxWidth(),
+                            video = VideoModel(originalUri),
+                            isVideoSelected = selectedItems.contains(originalUri.toString()),
                             onCheckChange = {
                                 if (it) {
                                     selectedItems.add(originalUri.toString())
@@ -83,7 +81,7 @@ fun ImageLibraryScreen(
                             }
                         )
                     } else {
-                        Text(text = "Image not found")
+                        Text(text = "Video not found")
                     }
                 }
             }
@@ -92,8 +90,8 @@ fun ImageLibraryScreen(
             .padding(24.dp)
             .fillMaxWidth(), buttonText = "Delete", onClick = {
             onUIEvent(
-                UIEvent.Images.OnDeleteSelectedImagesClick(
-                    selectedItems.map{uri->
+                UIEvent.Videos.OnDeleteSelectedVideosClick(
+                    selectedItems.map { uri ->
                         Uri.parse(uri)
                     }
                 )

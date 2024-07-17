@@ -1,8 +1,10 @@
 package com.notesapp.compressify.ui.library
 
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -33,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.notesapp.compressify.domain.model.ImageModel
 import com.notesapp.compressify.domain.model.LibraryModel
 import com.notesapp.compressify.ui.components.home.common.PrimaryButtonOutlined
+import com.notesapp.compressify.ui.theme.primaryColor
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.UIEvent
 import kotlinx.coroutines.launch
@@ -43,6 +47,7 @@ import java.io.File
 fun LibraryScreen(
     modifier: Modifier = Modifier,
     notDeletedImages: List<LibraryModel>,
+    notDeletedVideos: List<LibraryModel>,
     onUIEvent: (UIEvent) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -65,7 +70,6 @@ fun LibraryScreen(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .background(color = if (horizontalPagerState.currentPage == 0) primaryTintedColor else Color.Transparent)
                     .clickable {
                         coroutineScope.launch {
                             horizontalPagerState.animateScrollToPage(0)
@@ -75,13 +79,13 @@ fun LibraryScreen(
             ){
                 Text(
                     text = "Images",
+                    color = if(horizontalPagerState.currentPage == 0) primaryColor else MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .background(color = if (horizontalPagerState.currentPage == 1) primaryTintedColor else Color.Transparent)
                     .clickable {
                         coroutineScope.launch {
                             horizontalPagerState.animateScrollToPage(1)
@@ -91,6 +95,7 @@ fun LibraryScreen(
             ){
                 Text(
                     text = "Videos",
+                    color = if(horizontalPagerState.currentPage == 1) primaryColor else MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
             }
@@ -114,12 +119,13 @@ fun LibraryScreen(
                 }
 
                 else -> {
-                    Text(
-                        text = "Videos",
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        textAlign = TextAlign.Center
-                    )
+                   VideoLibraryScreen(
+                       modifier = Modifier
+                           .fillMaxSize()
+                           .padding(horizontal = 16.dp),
+                       notDeletedVideos = notDeletedVideos,
+                       onUIEvent = onUIEvent
+                   )
                 }
             }
         }

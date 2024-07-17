@@ -73,9 +73,6 @@ class MainViewModel @Inject constructor(
     private val _selectedVideosProcessing = MutableStateFlow(false)
     val selectedVideosProcessing = _selectedVideosProcessing.asStateFlow()
 
-    private val _currentRoute = MutableStateFlow(NavigationRoutes.HOME)
-    val currentRoute = _currentRoute.asStateFlow()
-
     private val _allImageCompressOptions = MutableStateFlow(ImageCompressionOptions())
     val allImageCompressOptions = _allImageCompressOptions.asStateFlow()
 
@@ -93,6 +90,12 @@ class MainViewModel @Inject constructor(
     val notDeletedImages = _notDeletedItems.map { libraryModels ->
         libraryModels.filter {
             it.category == MediaCategory.IMAGE
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val notDeletedVideos = _notDeletedItems.map { libraryModels ->
+        libraryModels.filter {
+            it.category == MediaCategory.VIDEO
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -152,7 +155,7 @@ class MainViewModel @Inject constructor(
 
     }
 
-    fun deleteSelectedImages(
+    private fun deleteSelectedImages(
         toDeleteImage: List<Uri>
     ) {
         viewModelScope.launch {
@@ -248,7 +251,7 @@ class MainViewModel @Inject constructor(
             }
 
             is UIEvent.Navigate -> {
-                _currentRoute.value = event.route
+                sendEvent(Event.NavigateTo(event.route))
             }
 
             is UIEvent.Images.OnImagesAdded -> {
@@ -288,6 +291,18 @@ class MainViewModel @Inject constructor(
             is UIEvent.Images.OnDeleteSelectedImagesClick -> {
                 deleteSelectedImages(event.toDeleteImages)
             }
+
+            is UIEvent.Videos.OnDeleteSelectedVideosClick -> {
+                deleteSelectedVideos(event.toDeleteVideos)
+            }
+        }
+    }
+
+    private fun deleteSelectedVideos(toDeleteVideos: List<Uri>) {
+        viewModelScope.launch {
+            deleteLibraryItemsUseCase.launch(
+                DeleteLibraryItemsUseCase.Parameters(toDeleteVideos)
+            )
         }
     }
 

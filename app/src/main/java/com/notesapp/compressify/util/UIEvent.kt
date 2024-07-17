@@ -38,6 +38,7 @@ sealed interface UIEvent {
         data class OnStartCompressionClick(
             val videosToOptions : List<Pair<Uri, MainViewModel.VideoCompressionOptions>>
         ): Videos
+        data class OnDeleteSelectedVideosClick(val toDeleteVideos : List<Uri>):Videos
     }
     data class Navigate(val route : NavigationRoutes) : UIEvent
 }

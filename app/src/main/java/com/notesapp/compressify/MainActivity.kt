@@ -56,7 +56,7 @@ import kotlinx.coroutines.withContext
 
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity(), NavController.OnDestinationChangedListener {
+class MainActivity : ComponentActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
     private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
@@ -99,6 +99,10 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                             Toast.makeText(this@MainActivity, event.message, Toast.LENGTH_SHORT)
                                 .show()
                         }
+
+                        is Event.NavigateTo -> {
+                            navController.navigate(event.route.name)
+                        }
                     }
                 }
             }
@@ -139,7 +143,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                 val videoCompressionOptions by viewModel.allVideoCompressOptions.collectAsState()
 
                 val notDeletedImages by viewModel.notDeletedImages.collectAsState()
-
+                val notDeletedVideos by viewModel.notDeletedVideos.collectAsState()
 
 
 
@@ -151,12 +155,6 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                     modifier = Modifier.fillMaxSize()
                 ) {
                     if (storagePermissionsGranted) {
-                        LaunchedEffect(key1 = Unit) {
-                            navController.addOnDestinationChangedListener(this@MainActivity)
-                            viewModel.currentRoute.collectLatest { route ->
-                                navController.navigate(route.name)
-                            }
-                        }
                         NavHost(
                             navController = navController,
                             startDestination = NavigationRoutes.HOME.name,
@@ -226,6 +224,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
                                 LibraryScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     notDeletedImages = notDeletedImages,
+                                    notDeletedVideos = notDeletedVideos,
                                     onUIEvent = viewModel::onUIEvent
                                 )
                             }
@@ -259,15 +258,7 @@ class MainActivity : ComponentActivity(), NavController.OnDestinationChangedList
         startActivity(intent)
     }
 
-    override fun onDestinationChanged(
-        controller: NavController,
-        destination: NavDestination,
-        arguments: Bundle?
-    ) {
-        destination.route?.let {
-            controller.popBackStack(it, false, true)
-        }
-    }
+
 
     override fun onResume() {
         super.onResume()

@@ -22,15 +22,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.notesapp.compressify.domain.model.ImageModel
+import com.notesapp.compressify.domain.model.VideoModel
 import com.notesapp.compressify.ui.theme.primaryTintedColor
 import com.notesapp.compressify.util.getFormattedSize
 
 @Composable
-fun IndividualLibraryScreenCard(
+fun IndividualLibraryVideoScreenCard(
     modifier: Modifier = Modifier,
-    image: ImageModel,
-    isImageSelected: Boolean,
+    video: VideoModel,
+    isVideoSelected: Boolean,
     onCheckChange: (Boolean) -> Unit
 ) {
     Card(
@@ -45,7 +45,7 @@ fun IndividualLibraryScreenCard(
                     .height(100.dp)
             ) {
                 Image(
-                    bitmap = image.thumbnail.asImageBitmap(),
+                    bitmap = video.thumbnail.asImageBitmap(),
                     contentDescription = "",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -61,17 +61,17 @@ fun IndividualLibraryScreenCard(
             ) {
                 Column(modifier = Modifier.weight(8f)) {
                     Text(
-                        text = image.name,
+                        text = video.name,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = image.size.getFormattedSize(),
+                        text = video.size.getFormattedSize(),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-               Checkbox(checked = isImageSelected , onCheckedChange = onCheckChange )
+                Checkbox(checked = isVideoSelected, onCheckedChange = onCheckChange )
             }
         }
     }

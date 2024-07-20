@@ -3,6 +3,7 @@ package com.notesapp.compressify
 import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
+import com.google.firebase.FirebaseApp
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +17,7 @@ class CompressApplication : Application() {
         super.onCreate()
         App = this
         appContext = applicationContext
+        FirebaseApp.initializeApp(this)
     }
 
     companion object {

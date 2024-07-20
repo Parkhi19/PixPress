@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "360719749676",
+    "project_id": "pixpress-1e1ee",
+    "storage_bucket": "pixpress-1e1ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360719749676:android:462f41b5a80d2d49c37789",
+        "android_client_info": {
+          "package_name": "com.notesapp.compressify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMJxwwOJunY5VoHkqqsDi2ZEwRRXRrf8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

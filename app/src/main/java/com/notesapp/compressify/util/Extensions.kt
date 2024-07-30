@@ -283,7 +283,7 @@ fun Double.precised(precision: Int): Double {
 }
 
 fun Uri.getAbsoluteImagePath(): Uri? {
-    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    val path = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         getAbsolutePathAboveAPI29(MediaCategory.IMAGE)
     } else {
         getAbsolutePathBelowAPI29(MediaCategory.IMAGE)
@@ -304,35 +304,35 @@ fun Uri.getAbsoluteVideoPath(): Uri? {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 private fun Uri.getAbsolutePathAboveAPI29(
     category: MediaCategory
 ): String? {
     val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
     val cursor = CompressApplication.contentResolver.query(this, projection, null, null, null)
     val displayID = cursor?.use {
-        it.moveToFirst()
-        val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
-        it.getString(index).substringBeforeLast(".")
+            it.moveToFirst()
+            val index = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+            it.getString(index)
+//                .substringBeforeLast(".")
     }
     return queryData(
         category,
-        MediaStore.MediaColumns._ID,
-        displayID
+        MediaStore.MediaColumns.DISPLAY_NAME,
+        displayID.toString()
     )
 }
 
 private fun Uri.getAbsolutePathBelowAPI29(category: MediaCategory): String? {
-    val projection = arrayOf(MediaStore.MediaColumns.DOCUMENT_ID)
+    val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
     val cursor = CompressApplication.contentResolver.query(this, projection, null, null, null)
     return if (cursor != null) {
-        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DOCUMENT_ID)
+        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
         cursor.moveToFirst()
         val documentId = cursor.getString(columnIndex)
         cursor.close()
         queryData(
             category,
-            MediaStore.MediaColumns.DOCUMENT_ID,
+            MediaStore.MediaColumns.DISPLAY_NAME,
             documentId
         )
     } else {
@@ -357,7 +357,7 @@ private fun queryData(
     }
     val resultCursor = CompressApplication.contentResolver.query(
         queryUri,
-        resultProjection,
+        null,
         "$selectionField = $0",
         arrayOf(selectionId),
         null

@@ -59,8 +59,8 @@ import kotlinx.coroutines.withContext
 class MainActivity : ComponentActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
-    private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
-    private lateinit var selectedVideoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
+//    private lateinit var selectedPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
+//    private lateinit var selectedVideoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, List<Uri>>
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
     private val storagePermissionGrantedFlow = MutableStateFlow(false)
@@ -107,8 +107,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            selectedPhotoLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.PickMultipleVisualMedia(),
+           val  selectedPhotoLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.OpenMultipleDocuments(),
                 onResult = { uris ->
                     if (uris.isNotEmpty()) {
                         viewModel.onImageSelected(
@@ -117,8 +117,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             )
-            selectedVideoLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.PickMultipleVisualMedia(),
+            val selectedVideoLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.OpenMultipleDocuments(),
                 onResult = { uris ->
                     if (uris.isNotEmpty()) {
                         viewModel.onVideoSelected(
@@ -168,16 +168,12 @@ class MainActivity : ComponentActivity() {
                                     categories = categories,
                                     onCompressImageClick = {
                                         selectedPhotoLauncher.launch(
-                                            PickVisualMediaRequest(
-                                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                                            )
+                                            arrayOf("image/*")
                                         )
                                     },
                                     onCompressVideoClick = {
                                         selectedVideoLauncher.launch(
-                                            PickVisualMediaRequest(
-                                                ActivityResultContracts.PickVisualMedia.VideoOnly
-                                            )
+                                            arrayOf("video/*")
                                         )
                                     },
                                     onLibraryButtonClick = {
